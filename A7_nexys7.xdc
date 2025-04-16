@@ -58,6 +58,12 @@ set_property PACKAGE_PIN N17 [get_ports BtnC]
 
 set_property PACKAGE_PIN M18 [get_ports BtnU] 
 	set_property IOSTANDARD LVCMOS33 [get_ports BtnU]
+	
+set_property PACKAGE_PIN P17 [get_ports BtnL] 
+	set_property IOSTANDARD LVCMOS33 [get_ports BtnL]
+
+set_property PACKAGE_PIN M17 [get_ports BtnR] 
+	set_property IOSTANDARD LVCMOS33 [get_ports BtnR]
 
 set_property PACKAGE_PIN A3 [get_ports {vgaR[0]}]				
 	set_property IOSTANDARD LVCMOS33 [get_ports {vgaR[0]}]
