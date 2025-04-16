@@ -112,6 +112,7 @@ module vga_bitchange(
     parameter WHITE = 12'b1111_1111_1111;
     parameter RED   = 12'b1111_0000_0000;
     parameter GREEN = 12'b0000_1111_0000;
+    parameter BLUE = 12'b0001_0001_0101;
     
     // Character position
     reg signed [9:0] posX = 10'd300;
@@ -120,14 +121,17 @@ module vga_bitchange(
     reg isJumping = 0;
     
     // Character size
-    parameter CHAR_WIDTH = 10'd20;
-    parameter CHAR_HEIGHT = 10'd20;
+    parameter CHAR_WIDTH = 10'd18;
+    parameter CHAR_HEIGHT = 10'd24;
 
     // Gravity and jump velocity
     parameter G = 1;
     parameter V_INIT = 7'd15;
     
     wire [9:0] GROUND_Y = 10'd460;
+
+    reg[49:0] marioSpeed;
+    reg[49:0] jumpSpeed;
 
     // Update character position
     always @(posedge clk or posedge rst) begin
@@ -139,22 +143,44 @@ module vga_bitchange(
         end else begin
             // Left/Right Movement
             if (btn_left)
-                posX <= posX - 1;
+            begin
+                marioSpeed = marioSpeed + 50'd1;
+                    if (marioSpeed >= 50'd500000) //500 thousand
+                    begin
+                        posX <= posX - 10'd1;
+                        marioSpeed = 50'd0;
+                    end
+            end
+
             else if (btn_right)
-                posX <= posX + 1;
+            begin
+                marioSpeed = marioSpeed + 50'd1;
+                if (marioSpeed >= 50'd500000) //500 thousand
+                    begin
+                        posX <= posX + 10'd1;
+                        marioSpeed = 50'd0;
+                    end
+            end
 
             // Jumping and Gravity
             if (isJumping) begin
-                V <= V + G;
-                posY <= posY + V;
+                jumpSpeed = jumpSpeed + 50'd1;
+                if (jumpSpeed >= 50'd500000) //500 thousand
+                begin
+                    V <= V + G;
+                    posY <= posY + V;
+                    jumpSpeed = 50'd0;
+                end
+                // posY <= posY + V;
 
                 if (posY >= GROUND_Y) begin
                     posY <= GROUND_Y;
                     isJumping <= 0;
                     V <= 0;
                 end
-            end else if (btn_jump && posY >= GROUND_Y) begin
-                isJumping <= 1;
+            end 
+            else if (btn_jump && posY >= GROUND_Y) begin
+                isJumping <= 10'd1;
                 V <= -V_INIT;
                 posY <= posY - V_INIT;
             end
@@ -165,7 +191,7 @@ module vga_bitchange(
     wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
                    ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
 
-    wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= GROUND_Y + CHAR_HEIGHT + 10);
+    wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
 
     always @(*) begin
         if (!bright)
@@ -175,7 +201,7 @@ module vga_bitchange(
         else if (inGround)
             rgb = GREEN;
         else
-            rgb = RED;
+            rgb = BLUE;
     end
 
 endmodule
