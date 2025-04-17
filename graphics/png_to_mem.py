@@ -3,8 +3,8 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 # === Configuration ===
-input_path = 'mario.png'
-output_path = './m.mem'
+input_path = 'test_mario.png'
+output_path = './m_hex.mem'  # renamed for clarity
 write_output_file = True
 
 # === Load image ===
@@ -30,18 +30,18 @@ plt.axis('off')
 plt.title("Original (left) vs 8-bit 3-3-2 Quantized (right)")
 plt.show()
 
-# === Write .mem file ===
+# === Write .mem file (HEX) ===
 if write_output_file:
-    print(f"Writing output file: {output_path}")
+    print(f"Writing hex .mem file to: {output_path}")
     with open(output_path, 'w') as f:
         for row in range(img_np.shape[0]):
-            line = ''
+            hex_line = []
             for col in range(img_np.shape[1]):
                 r = R_q[row, col]
                 g = G_q[row, col]
                 b = B_q[row, col]
-                # Format: 3 bits R + 3 bits G + 2 bits B
-                bin_pixel = f'{r:03b}{g:03b}{b:02b}'
-                line += bin_pixel + ' '
-            f.write(line.rstrip() + '\n')
-    print("Done.")
+                pixel_val = (r << 5) | (g << 2) | b  # Combine bits into 1 byte
+                hex_val = f'{pixel_val:02X}'  # 2-digit uppercase hex
+                hex_line.append(hex_val)
+            f.write(' '.join(hex_line) + '\n')
+    print("✅ Done writing hex .mem.")
