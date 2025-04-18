@@ -429,6 +429,24 @@ module vga_bitchange(
         end
     end
 
+
+// ----------------------------------------- HELLO MADISON I ADDED THIS PART, MUST CHECK IF THIS WORKS OR NOT ----------------------------
+    // CHARACTER DEDUCTIONS
+    
+    // parameter SCREEN_LEFT  = 10'd143;
+    // parameter SCREEN_RIGHT = 10'd734 - CHAR_WIDTH;
+    // always @(posedge clk or posedge rst) begin
+    //     if (rst) begin
+    //         posX <= 10'd300;
+    //     end else begin
+    //         if (posX < SCREEN_LEFT)
+    //             posX <= SCREEN_LEFT;
+    //         else if (posX > SCREEN_RIGHT)
+    //             posX <= SCREEN_RIGHT;
+    //     end
+    // end
+// ---------------------------------------------------------------------------------------------------------------------------
+
     // Drawing logic
     // wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
     //                ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
