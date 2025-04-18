@@ -310,6 +310,51 @@ module vga_bitchange(
     reg[49:0] marioSpeed;
     reg[49:0] jumpSpeed;
 
+    // drawing logic variables
+    wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
+                   ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
+
+    wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
+
+    // mario sprite
+    // wire [15:0] mario_row_data;
+    wire [4:0] relY = vCount - posY;
+    wire [4:0] relX = hCount - posX;
+
+    wire [1:0] inSpriteBounds = hCount >= posX && hCount < posX + CHAR_WIDTH &&
+                        vCount >= posY && vCount < posY + CHAR_HEIGHT;
+
+    // holds the address of the sprite bit in the rom array
+    wire [9:0] sprite_addr = inSpriteBounds ? (relY * CHAR_WIDTH + relX) : 0;
+    // holds the 12-bit color hex
+    reg [11:0] sprite_pixel_color;
+
+    // hold the color hex for each sprite
+    wire [11:0] idle_sprite_color;
+    wire [11:0] jump_right_sprite_color;
+    wire [11:0] jump_left_sprite_color;
+
+    // instantiate all sprites
+    mario_idle marioIdleSprite(
+        .clk(clk),
+        .addr(sprite_addr),
+        .pixel_data(idle_sprite_color)
+    );
+
+    mario_jump_left marioJumpLeftSprite(
+        .clk(clk),
+        .addr(sprite_addr),
+        .pixel_data(jump_left_sprite_color)
+    );
+
+    mario_jump_right marioJumpRightSprite(
+        .clk(clk),
+        .addr(sprite_addr),
+        .pixel_data(jump_right_sprite_color)
+    );
+
+
+
     // Update character position
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -317,10 +362,23 @@ module vga_bitchange(
             posY <= GROUND_Y;
             isJumping <= 0;
             V <= 0;
+    
         end else begin
+
+            // load default sprite first
+            // this will be overwritten by anything that happens after
+            sprite_pixel_color = idle_sprite_color;
+
             // Left/Right Movement
             if (btn_left)
             begin
+                // load the correct sprite
+
+                // load the correct sprite if jumping
+                if (isJumping) begin
+                    sprite_pixel_color = jump_left_sprite_color;
+                end
+
                 marioSpeed = marioSpeed + 50'd1;
                     if (marioSpeed >= 50'd500000) //500 thousand
                     begin
@@ -331,6 +389,13 @@ module vga_bitchange(
 
             else if (btn_right)
             begin
+                // load the correct sprite
+
+                // load the correct sprite if jumping
+                if (isJumping) begin
+                    sprite_pixel_color = jump_right_sprite_color;
+                end
+
                 marioSpeed = marioSpeed + 50'd1;
                 if (marioSpeed >= 50'd500000) //500 thousand
                     begin
@@ -365,29 +430,29 @@ module vga_bitchange(
     end
 
     // Drawing logic
-    wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
-                   ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
+    // wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
+    //                ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
 
-    wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
+    // wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
 
-    // mario sprite
-    // wire [15:0] mario_row_data;
-    wire [4:0] relY = vCount - posY;
-    wire [4:0] relX = hCount - posX;
+    // // mario sprite
+    // // wire [15:0] mario_row_data;
+    // wire [4:0] relY = vCount - posY;
+    // wire [4:0] relX = hCount - posX;
 
-    wire [1:0] inSpriteBounds = hCount >= posX && hCount < posX + CHAR_WIDTH &&
-                        vCount >= posY && vCount < posY + CHAR_HEIGHT;
+    // wire [1:0] inSpriteBounds = hCount >= posX && hCount < posX + CHAR_WIDTH &&
+    //                     vCount >= posY && vCount < posY + CHAR_HEIGHT;
 
     // assign sprite_addr = relY * CHAR_WIDTH + relX; // 1D address for pixel color
-    wire [7:0] sprite_addr = inSpriteBounds ? (relY * CHAR_WIDTH + relX) : 0;
-    // holds the 12-bit color hex
-    wire [11:0] sprite_pixel_color;
+    // wire [9:0] sprite_addr = inSpriteBounds ? (relY * CHAR_WIDTH + relX) : 0;
+    // // holds the 12-bit color hex
+    // wire [11:0] sprite_pixel_color;
 
-    mario_rom marioSprite(
-        .clk(clk),
-        .addr(sprite_addr),
-        .pixel_data(sprite_pixel_color)
-    );
+    // mario_jump_right marioSprite(
+    //     .clk(clk),
+    //     .addr(sprite_addr),
+    //     .pixel_data(sprite_pixel_color)
+    // );
 
     // Pipeline registers
     reg [11:0] rgb_next;
@@ -415,14 +480,6 @@ module vga_bitchange(
         if (!bright_d)
             rgb_next <= BLACK;
         else if (isMarioPixel_d) begin
-            // Convert to 12-bit color
-            // red_8bit   = sprite_pixel_color[7:5];
-            // green_8bit = sprite_pixel_color[4:2];
-            // blue_8bit  = sprite_pixel_color[1:0];
-            // rgb_next <= {red_8bit, red_8bit, green_8bit, green_8bit, blue_8bit, blue_8bit};
-            // rgb_next <= {sprite_pixel_color[7:5], sprite_pixel_color[7:5],   // red
-            //     sprite_pixel_color[4:2], sprite_pixel_color[4:2],   // green
-            //     sprite_pixel_color[1:0], sprite_pixel_color[1:0]};  // blue
             rgb_next <= sprite_pixel_color;
         end
         else if (inGround_d)
@@ -476,29 +533,29 @@ endmodule
 //      each row should contain the information for a single pixel
 //      for our mem file, each pixel will be compressed 8-bit RGB formatted
 // and every clock, extract the next element from the array and return it
- module mario_rom (
-    input wire clk,
-    input wire [7:0] addr,        // 8-bit address: 2^8 = 256 > 192 (12x16)
-    output reg [11:0] pixel_data   // 8-bit RGB (3-3-2)
-);
+//  module mario_jump_right (
+//     input wire clk,
+//     input wire [9:0] addr,        // 10-bit address: 2^10 = 1024
+//     output reg [11:0] pixel_data   // 8-bit RGB (3-3-2)
+// );
 
-    // 12 x 16 = 192 pixels
-    reg [11:0] rom [0:191];        // 192 total pixels
+//     // 32x32 = 1024 pixels
+//     reg [11:0] rom [0:1023];        // 1024 total pixels
 
-    initial begin
-        $readmemh("C:/Mario/m_hex.mem", rom);
-    end
+//     initial begin
+//         $readmemh("C:/Mario/m_hex.mem", rom);
+//     end
 
-    always @(posedge clk) begin
-        pixel_data <= rom[addr];
-    end
+//     always @(posedge clk) begin
+//         pixel_data <= rom[addr];
+//     end
 
-    // initial begin
-    // for (integer i = 0; i < 192; i = i + 1)
-    //     rom[i] = 8'hFF;  // white
-    // end
+//     // initial begin
+//     // for (integer i = 0; i < 192; i = i + 1)
+//     //     rom[i] = 8'hFF;  // white
+//     // end
 
-endmodule
+// endmodule
 
 // reg [7:0] rom_data [0:431];
 
@@ -528,140 +585,6 @@ endmodule
 //     end
 
 // endmodule
-
-// `timescale 1ns / 1ps
-// //////////////////////////////////////////////////////////////////////////////////
-// // VGA Character Controller with ROM-based Mario sprite
-// //////////////////////////////////////////////////////////////////////////////////
-// module vga_bitchange(
-//     input clk,
-//     input rst,
-//     input bright,
-//     input btn_left,
-//     input btn_right,
-//     input btn_jump,
-//     input [9:0] hCount, vCount,
-//     output reg [11:0] rgb,
-// 	output reg [15:0] score
-// );
-
-//     // Colors
-//     parameter BLACK = 12'b0000_0000_0000;
-//     parameter WHITE = 12'b1111_1111_1111;
-//     parameter RED   = 12'b1111_0000_0000;
-//     parameter GREEN = 12'b0000_1111_0000;
-//     parameter BLUE = 12'b0001_0001_0101;
-
-//     // Character config
-//     parameter CHAR_WIDTH = 10'd18;
-//     parameter CHAR_HEIGHT = 10'd24;
-//     parameter G = 1;
-//     parameter V_INIT = 7'd15;
-//     wire [9:0] GROUND_Y = 10'd460;
-
-//     // Position and state
-//     reg signed [9:0] posX = 10'd300;
-//     reg signed [9:0] posY = 10'd400;
-//     reg signed [6:0] V = 0;
-//     reg isJumping = 0;
-//     reg [49:0] marioSpeed;
-//     reg [49:0] jumpSpeed;
-
-//     // ROM-related wires
-//     wire [4:0] relY = vCount - posY;
-//     wire [4:0] relX = hCount - posX;
-//     wire [17:0] mario_row_data;
-//     wire mario_visible = (hCount >= posX && hCount < posX + CHAR_WIDTH) &&
-//                          (vCount >= posY && vCount < posY + CHAR_HEIGHT);
-//     wire mario_pixel_on = mario_row_data[CHAR_WIDTH - 1 - relX];
-
-//     // Instantiate mario sprite ROM
-//     mario_rom mario_sprite (
-//         .row(relY),
-//         .pixels(mario_row_data)
-//     );
-
-//     // Movement & jump logic
-//     always @(posedge clk or posedge rst) begin
-//         if (rst) begin
-//             posX <= 10'd300;
-//             posY <= GROUND_Y;
-//             isJumping <= 0;
-//             V <= 0;
-//         end else begin
-//             // Left/Right
-//             if (btn_left) begin
-//                 marioSpeed = marioSpeed + 50'd1;
-//                 if (marioSpeed >= 50'd500000) begin
-//                     posX <= posX - 10'd1;
-//                     marioSpeed = 50'd0;
-//                 end
-//             end else if (btn_right) begin
-//                 marioSpeed = marioSpeed + 50'd1;
-//                 if (marioSpeed >= 50'd500000) begin
-//                     posX <= posX + 10'd1;
-//                     marioSpeed = 50'd0;
-//                 end
-//             end
-
-//             // Jumping
-//             if (isJumping) begin
-//                 jumpSpeed = jumpSpeed + 50'd1;
-//                 if (jumpSpeed >= 50'd500000) begin
-//                     V <= V + G;
-//                     posY <= posY + V;
-//                     jumpSpeed = 50'd0;
-//                 end
-//                 if (posY >= GROUND_Y) begin
-//                     posY <= GROUND_Y;
-//                     isJumping <= 0;
-//                     V <= 0;
-//                 end
-//             end else if (btn_jump && posY >= GROUND_Y) begin
-//                 isJumping <= 1;
-//                 V <= -V_INIT;
-//                 posY <= posY - V_INIT;
-//             end
-//         end
-//     end
-
-//     // Display logic
-//     wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
-//     wire inBlock = mario_visible && mario_pixel_on;
-
-//     always @(*) begin
-//         if (!bright)
-//             rgb = BLACK;
-//         else if (inBlock)
-//             rgb = RED; // You can make this match Mario’s actual color
-//         else if (inGround)
-//             rgb = GREEN;
-//         else
-//             rgb = BLUE;
-//     end
-
-// endmodule
-
-// //////////////////////////////////////////////////////////////////////////////////
-// // Embedded ROM for Mario sprite (18x24)
-// //////////////////////////////////////////////////////////////////////////////////
-// module mario_rom (
-//     input [4:0] row,           // 0–23
-//     output reg [17:0] pixels   // 18 pixels per row
-// );
-
-//     reg [17:0] rom [0:23];     // 24 rows
-
-//     initial begin
-//         $readmemh("mario_sprite.mem", rom);
-//     end
-
-//     always @(*) begin
-//         pixels = rom[row];
-//     end
-
-// endmodule
-
 
 
 // 03 03 03 A4 A4 A4 A4 A4 03 03 03 03
