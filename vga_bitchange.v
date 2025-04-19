@@ -317,6 +317,10 @@ module vga_bitchange(
     wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
 
     // mario sprite
+
+    // direction flag for jumping when not pressing any other button
+    reg [1:0] marioDirection // 0 for right, 1 for left
+
     // wire [15:0] mario_row_data;
     wire [4:0] relY = vCount - posY;
     wire [4:0] relX = hCount - posX;
@@ -330,15 +334,36 @@ module vga_bitchange(
     reg [11:0] sprite_pixel_color;
 
     // hold the color hex for each sprite
-    wire [11:0] idle_sprite_color;
+    wire [11:0] idle_right_sprite_color;
+    wire [11:0] idle_left_sprite_color;
+    wire [11:0] walk_right_sprite_color;
+    wire [11:0] walk_left_sprite_color;
     wire [11:0] jump_right_sprite_color;
     wire [11:0] jump_left_sprite_color;
 
     // instantiate all sprites
-    mario_idle marioIdleSprite(
+    mario_idle_right marioIdleRightSprite(
         .clk(clk),
         .addr(sprite_addr),
-        .pixel_data(idle_sprite_color)
+        .pixel_data(idle_right_sprite_color)
+    );
+
+    mario_idle_left marioIdleLeftSprite(
+        .clk(clk),
+        .addr(sprite_addr),
+        .pixel_data(idle_left_sprite_color)
+    );
+
+    mario_walk_right marioWalkRightSprite(
+        .clk(clk),
+        .addr(sprite_addr),
+        .pixel_data(walk_right_sprite_color)
+    );
+
+    mario_walk_left marioWalkLeftSprite(
+        .clk(clk),
+        .addr(sprite_addr),
+        .pixel_data(walk_left_sprite_color)
     );
 
     mario_jump_left marioJumpLeftSprite(
@@ -367,17 +392,19 @@ module vga_bitchange(
 
             // load default sprite first
             // this will be overwritten by anything that happens after
-            sprite_pixel_color = idle_sprite_color;
+            if (marioDirection) // left 
+                sprite_pixel_color = idle_left_sprite_color;
+            else if (!marioDirection) // right
+                sprite_pixel_color = idle_right_sprite_color;
 
             // Left/Right Movement
             if (btn_left)
             begin
-                // load the correct sprite
 
-                // load the correct sprite if jumping
-                if (isJumping) begin
-                    sprite_pixel_color = jump_left_sprite_color;
-                end
+                // set the direction flag
+                marioDirection = 1'b1;
+                // load the correct sprite
+                sprite_pixel_color = walk_left_sprite_color;
 
                 marioSpeed = marioSpeed + 50'd1;
                     if (marioSpeed >= 50'd500000) //500 thousand
@@ -389,12 +416,10 @@ module vga_bitchange(
 
             else if (btn_right)
             begin
+                // set direction flag
+                marioDirection = 1'b0;
                 // load the correct sprite
-
-                // load the correct sprite if jumping
-                if (isJumping) begin
-                    sprite_pixel_color = jump_right_sprite_color;
-                end
+                sprite_pixel_color = walk_right_sprite_color;
 
                 marioSpeed = marioSpeed + 50'd1;
                 if (marioSpeed >= 50'd500000) //500 thousand
@@ -406,6 +431,15 @@ module vga_bitchange(
 
             // Jumping and Gravity
             if (isJumping) begin
+
+                // set the correct sprite depending on which direction mario was facing
+                if (!marioDirection || btn_right) begin // right facing
+                    sprite_pixel_color = jump_right_sprite_color;
+                end
+                else if (marioDirection || btn_left) begin // left facing
+                    sprite_pixel_color = jump_left_sprite_color;
+                end
+
                 jumpSpeed = jumpSpeed + 50'd1;
                 if (jumpSpeed >= 50'd1000000) //500 thousand
                 begin
