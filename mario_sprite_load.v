@@ -14,7 +14,7 @@ module mario_jump_right (
     reg [11:0] rom [0:1023];        // 1024 total pixels
 
     initial begin
-        $readmemh("C:/Mario/32x32_mario_jump_right.mem", rom);
+        $readmemh("./32x32_mario/32x32_mario_jump_right.mem", rom);
     end
 
     always @(posedge clk) begin
@@ -33,7 +33,7 @@ module mario_jump_left (
     reg [11:0] rom [0:1023];        // 1024 total pixels
 
     initial begin
-        $readmemh("C:/Mario/32x32_mario_jump_left.mem", rom);
+        $readmemh("./32x32_mario/32x32_mario_jump_left.mem", rom);
     end
 
     always @(posedge clk) begin
@@ -52,7 +52,7 @@ module mario_walk_left (
     reg [11:0] rom [0:1023];        // 1024 total pixels
 
     initial begin
-        $readmemh("C:/Mario/32x32_mario_walk_left.mem", rom);
+        $readmemh("./32x32_mario/32x32_mario_walk_left.mem", rom);
     end
 
     always @(posedge clk) begin
@@ -71,7 +71,7 @@ module mario_walk_right (
     reg [11:0] rom [0:1023];        // 1024 total pixels
 
     initial begin
-        $readmemh("C:/Mario/32x32_mario_walk_right.mem", rom);
+        $readmemh("./32x32_mario/32x32_mario_walk_right.mem", rom);
     end
 
     always @(posedge clk) begin
@@ -90,7 +90,7 @@ module mario_idle_right (
     reg [11:0] rom [0:1023];        // 1024 total pixels
 
     initial begin
-        $readmemh("C:/Mario/32x32_mario_idle_right.mem", rom);
+        $readmemh("./32x32_mario/32x32_mario_idle_right.mem", rom);
     end
 
     always @(posedge clk) begin
@@ -109,7 +109,7 @@ module mario_idle_left (
     reg [11:0] rom [0:1023];        // 1024 total pixels
 
     initial begin
-        $readmemh("C:/Mario/32x32_mario_idle_left.mem", rom);
+        $readmemh("./32x32_mario/32x32_mario_idle_left.mem", rom);
     end
 
     always @(posedge clk) begin
