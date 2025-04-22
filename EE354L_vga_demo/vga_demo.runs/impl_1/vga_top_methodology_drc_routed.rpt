@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.1 (win64) Build 5076996 Wed May 22 18:37:14 MDT 2024
-| Date         : Fri Apr 18 17:48:33 2025
-| Host         : GDESK-26 running 64-bit major release  (build 9200)
+| Date         : Mon Apr 21 20:54:06 2025
+| Host         : GDESK-44 running 64-bit major release  (build 9200)
 | Command      : report_methodology -file vga_top_methodology_drc_routed.rpt -pb vga_top_methodology_drc_routed.pb -rpx vga_top_methodology_drc_routed.rpx
 | Design       : vga_top
 | Device       : xc7a100tcsg324-1

@@ -113,6 +113,15 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
+      <File Path="$PSRCDIR/sources_1/imports/src/tiles_sprite_load.v">
+        <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/tiles_sprite_load.v"/>
+          <Attr Name="ImportTime" Val="1745293782"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <File Path="$PPRDIR/src/vga_bitchange.v">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -137,8 +146,10 @@
     </FileSet>
     <FileSet Name="constrs_1" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1" RelGenDir="$PGENDIR/constrs_1">
       <Filter Type="Constrs"/>
-      <File Path="$PPRDIR/../A7_nexys7.xdc">
+      <File Path="$PSRCDIR/constrs_1/imports/src/A7_nexys7.xdc">
         <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/A7_nexys7.xdc"/>
+          <Attr Name="ImportTime" Val="1744760387"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
         </FileInfo>
@@ -193,6 +204,30 @@
         <FileInfo>
           <Attr Name="ImportPath" Val="$PPRDIR/src/32x32_mario/32x32_mario_walk_right.mem"/>
           <Attr Name="ImportTime" Val="1745020879"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sim_1/imports/tiles/24x24_block.mem">
+        <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/tiles/24x24_block.mem"/>
+          <Attr Name="ImportTime" Val="1745283989"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sim_1/imports/tiles/24x24_platform.mem">
+        <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/tiles/24x24_platform.mem"/>
+          <Attr Name="ImportTime" Val="1745283989"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sim_1/imports/tiles/24x24_ground.mem">
+        <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/tiles/24x24_ground.mem"/>
+          <Attr Name="ImportTime" Val="1745283989"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>

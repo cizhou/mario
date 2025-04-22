@@ -57,12 +57,7 @@ if {$::dispatch::connected} {
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
 set_param chipscope.maxJobs 1
-set_param checkpoint.writeSynthRtdsInDcp 1
-set_param synth.incrementalSynthesisCache C:/Users/mhyang/AppData/Roaming/Xilinx/Vivado/.Xil/Vivado-12400-GDESK-26/incrSyn
 set_param xicom.use_bs_reader 1
-set_msg_config -id {Common 17-41} -limit 10000000
-set_msg_config -id {Synth 8-256} -limit 10000
-set_msg_config -id {Synth 8-638} -limit 10000
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7a100tcsg324-1
 
@@ -81,6 +76,7 @@ read_verilog -library xil_defaultlib {
   C:/Mario/EE354L_vga_demo/src/counter.v
   C:/Mario/EE354L_vga_demo/src/display_controller.v
   C:/Mario/EE354L_vga_demo/vga_demo.srcs/sources_1/imports/src/mario_sprite_load.v
+  C:/Mario/EE354L_vga_demo/vga_demo.srcs/sources_1/imports/src/tiles_sprite_load.v
   C:/Mario/EE354L_vga_demo/src/vga_bitchange.v
   C:/Mario/EE354L_vga_demo/vga_demo.srcs/sources_1/imports/Mario/A7_vga_top.v
 }
@@ -93,8 +89,8 @@ OPTRACE "Adding files" END { }
 foreach dcp [get_files -quiet -all -filter file_type=="Design\ Checkpoint"] {
   set_property used_in_implementation false $dcp
 }
-read_xdc C:/Mario/A7_nexys7.xdc
-set_property used_in_implementation false [get_files C:/Mario/A7_nexys7.xdc]
+read_xdc C:/Mario/EE354L_vga_demo/vga_demo.srcs/constrs_1/imports/src/A7_nexys7.xdc
+set_property used_in_implementation false [get_files C:/Mario/EE354L_vga_demo/vga_demo.srcs/constrs_1/imports/src/A7_nexys7.xdc]
 
 set_param ips.enableIPCacheLiteLoad 1
 close [open __synthesis_is_running__ w]

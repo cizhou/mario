@@ -1,4 +1,4 @@
-set_property SRC_FILE_INFO {cfile:C:/Mario/A7_nexys7.xdc rfile:../../../../A7_nexys7.xdc id:1} [current_design]
+set_property SRC_FILE_INFO {cfile:C:/Mario/EE354L_vga_demo/vga_demo.srcs/constrs_1/imports/src/A7_nexys7.xdc rfile:../../../vga_demo.srcs/constrs_1/imports/src/A7_nexys7.xdc id:1} [current_design]
 set_property src_info {type:XDC file:1 line:4 export:INPUT save:INPUT read:READ} [current_design]
 set_property PACKAGE_PIN E3 [get_ports ClkPort]
 set_property src_info {type:XDC file:1 line:8 export:INPUT save:INPUT read:READ} [current_design]

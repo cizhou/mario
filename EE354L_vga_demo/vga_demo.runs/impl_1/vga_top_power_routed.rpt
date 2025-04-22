@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2024.1 (win64) Build 5076996 Wed May 22 18:37:14 MDT 2024
-| Date             : Fri Apr 18 17:48:33 2025
-| Host             : GDESK-26 running 64-bit major release  (build 9200)
+| Date             : Mon Apr 21 20:54:07 2025
+| Host             : GDESK-44 running 64-bit major release  (build 9200)
 | Command          : report_power -file vga_top_power_routed.rpt -pb vga_top_power_summary_routed.pb -rpx vga_top_power_routed.rpx
 | Design           : vga_top
 | Device           : xc7a100tcsg324-1
@@ -30,10 +30,10 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 0.110        |
+| Total On-Chip Power (W)  | 0.111        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 0.012        |
+| Dynamic (W)              | 0.014        |
 | Device Static (W)        | 0.097        |
 | Effective TJA (C/W)      | 4.6          |
 | Max Ambient (C)          | 84.5         |
@@ -52,18 +52,17 @@ Table of Contents
 +----------------+-----------+----------+-----------+-----------------+
 | On-Chip        | Power (W) | Used     | Available | Utilization (%) |
 +----------------+-----------+----------+-----------+-----------------+
-| Clocks         |     0.002 |        3 |       --- |             --- |
-| Slice Logic    |    <0.001 |      612 |       --- |             --- |
-|   LUT as Logic |    <0.001 |      266 |     63400 |            0.42 |
-|   CARRY4       |    <0.001 |       74 |     15850 |            0.47 |
-|   Register     |    <0.001 |      203 |    126800 |            0.16 |
-|   F7/F8 Muxes  |    <0.001 |        7 |     63400 |            0.01 |
+| Clocks         |     0.003 |        3 |       --- |             --- |
+| Slice Logic    |    <0.001 |      764 |       --- |             --- |
+|   LUT as Logic |    <0.001 |      332 |     63400 |            0.52 |
+|   CARRY4       |    <0.001 |       89 |     15850 |            0.56 |
+|   Register     |    <0.001 |      258 |    126800 |            0.20 |
 |   Others       |     0.000 |       20 |       --- |             --- |
-| Signals        |    <0.001 |      494 |       --- |             --- |
+| Signals        |    <0.001 |      664 |       --- |             --- |
 | Block RAM      |     0.005 |        3 |       135 |            2.22 |
 | I/O            |     0.004 |       36 |       210 |           17.14 |
 | Static Power   |     0.097 |          |           |                 |
-| Total          |     0.110 |          |           |                 |
+| Total          |     0.111 |          |           |                 |
 +----------------+-----------+----------+-----------+-----------------+
 
 
@@ -73,7 +72,7 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) | Powerup (A) | Budget (A)  | Margin (A) |
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
-| Vccint    |       1.000 |     0.023 |       0.008 |      0.015 |       NA    | Unspecified | NA         |
+| Vccint    |       1.000 |     0.024 |       0.009 |      0.015 |       NA    | Unspecified | NA         |
 | Vccaux    |       1.800 |     0.018 |       0.000 |      0.018 |       NA    | Unspecified | NA         |
 | Vcco33    |       3.300 |     0.005 |       0.001 |      0.004 |       NA    | Unspecified | NA         |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
@@ -139,12 +138,12 @@ Table of Contents
 3.1 By Hierarchy
 ----------------
 
-+--------------------------+-----------+
-| Name                     | Power (W) |
-+--------------------------+-----------+
-| vga_top                  |     0.012 |
-|   vbc                    |     0.008 |
-|     marioJumpRightSprite |     0.001 |
-+--------------------------+-----------+
++-------------------------+-----------+
+| Name                    | Power (W) |
++-------------------------+-----------+
+| vga_top                 |     0.014 |
+|   vbc                   |     0.009 |
+|     marioIdleLeftSprite |     0.001 |
++-------------------------+-----------+
 
 

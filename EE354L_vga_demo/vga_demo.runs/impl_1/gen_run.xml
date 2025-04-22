@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="impl_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1745023632">
+<GenRun Id="impl_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1745293956">
   <File Type="ROUTE-PWR" Name="vga_top_power_routed.rpt"/>
   <File Type="PA-TCL" Name="vga_top.tcl"/>
   <File Type="ROUTE-PWR-SUM" Name="vga_top_power_summary_routed.pb"/>
@@ -109,6 +109,15 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
+    <File Path="$PSRCDIR/sources_1/imports/src/tiles_sprite_load.v">
+      <FileInfo>
+        <Attr Name="ImportPath" Val="$PPRDIR/src/tiles_sprite_load.v"/>
+        <Attr Name="ImportTime" Val="1745293782"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
     <File Path="$PPRDIR/src/vga_bitchange.v">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
@@ -133,8 +142,10 @@
   </FileSet>
   <FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1" RelGenDir="$PGENDIR/constrs_1">
     <Filter Type="Constrs"/>
-    <File Path="$PPRDIR/../A7_nexys7.xdc">
+    <File Path="$PSRCDIR/constrs_1/imports/src/A7_nexys7.xdc">
       <FileInfo>
+        <Attr Name="ImportPath" Val="$PPRDIR/src/A7_nexys7.xdc"/>
+        <Attr Name="ImportTime" Val="1744760387"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="implementation"/>
       </FileInfo>

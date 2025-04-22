@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.1 (win64) Build 5076996 Wed May 22 18:37:14 MDT 2024
-| Date         : Fri Apr 18 17:47:57 2025
-| Host         : GDESK-26 running 64-bit major release  (build 9200)
+| Date         : Mon Apr 21 20:53:26 2025
+| Host         : GDESK-44 running 64-bit major release  (build 9200)
 | Command      : report_control_sets -verbose -file vga_top_control_sets_placed.rpt
 | Design       : vga_top
 | Device       : xc7a100t
@@ -23,11 +23,11 @@ Table of Contents
 +----------------------------------------------------------+-------+
 |                          Status                          | Count |
 +----------------------------------------------------------+-------+
-| Total control sets                                       |    12 |
-|    Minimum number of control sets                        |    12 |
+| Total control sets                                       |    15 |
+|    Minimum number of control sets                        |    15 |
 |    Addition due to synthesis replication                 |     0 |
 |    Addition due to physical synthesis replication        |     0 |
-| Unused register locations in slices containing registers |    69 |
+| Unused register locations in slices containing registers |    86 |
 +----------------------------------------------------------+-------+
 * Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
 ** Run report_qor_suggestions for automated merging and remapping suggestions
@@ -39,15 +39,15 @@ Table of Contents
 +--------------------+-------+
 |       Fanout       | Count |
 +--------------------+-------+
-| Total control sets |    12 |
+| Total control sets |    15 |
 | >= 0 to < 4        |     4 |
-| >= 4 to < 6        |     0 |
-| >= 6 to < 8        |     1 |
-| >= 8 to < 10       |     1 |
+| >= 4 to < 6        |     1 |
+| >= 6 to < 8        |     0 |
+| >= 8 to < 10       |     3 |
 | >= 10 to < 12      |     2 |
 | >= 12 to < 14      |     0 |
 | >= 14 to < 16      |     0 |
-| >= 16              |     4 |
+| >= 16              |     5 |
 +--------------------+-------+
 * Control sets can be remapped at either synth_design or opt_design
 
@@ -58,33 +58,36 @@ Table of Contents
 +--------------+-----------------------+------------------------+-----------------+--------------+
 | Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
 +--------------+-----------------------+------------------------+-----------------+--------------+
-| No           | No                    | No                     |              48 |           21 |
+| No           | No                    | No                     |              39 |           19 |
 | No           | No                    | Yes                    |               1 |            1 |
-| No           | Yes                   | No                     |              10 |            3 |
-| Yes          | No                    | No                     |             108 |           31 |
-| Yes          | No                    | Yes                    |              27 |            9 |
-| Yes          | Yes                   | No                     |               9 |            4 |
+| No           | Yes                   | No                     |              18 |            5 |
+| Yes          | No                    | No                     |             160 |           47 |
+| Yes          | No                    | Yes                    |              27 |           10 |
+| Yes          | Yes                   | No                     |              13 |            4 |
 +--------------+-----------------------+------------------------+-----------------+--------------+
 
 
 4. Detailed Control Set Information
 -----------------------------------
 
-+--------------------+---------------------------+----------------------+------------------+----------------+--------------+
-|    Clock Signal    |       Enable Signal       |   Set/Reset Signal   | Slice Load Count | Bel Load Count | Bels / Slice |
-+--------------------+---------------------------+----------------------+------------------+----------------+--------------+
-|  ClkPort_IBUF_BUFG |                           | BtnC_IBUF            |                1 |              1 |         1.00 |
-|  dc/clk            |                           |                      |                1 |              1 |         1.00 |
-|  dc/clk            | dc/hCount[9]_i_1_n_0      |                      |                1 |              1 |         1.00 |
-|  dc/pulse          |                           |                      |                1 |              1 |         1.00 |
-|  ClkPort_IBUF_BUFG | vbc/sprite_pixel_color    |                      |                4 |              7 |         1.75 |
-|  dc/clk            | dc/hCount[9]_i_1_n_0      | dc/vCount[9]_i_1_n_0 |                4 |              9 |         2.25 |
-|  ClkPort_IBUF_BUFG | vbc/posX[9]_i_1_n_0       | BtnC_IBUF            |                4 |             10 |         2.50 |
-|  dc/clk            |                           | dc/hCount[9]_i_1_n_0 |                3 |             10 |         3.33 |
-|  ClkPort_IBUF_BUFG | vbc/V                     | BtnC_IBUF            |                5 |             17 |         3.40 |
-|  ClkPort_IBUF_BUFG |                           |                      |               19 |             46 |         2.42 |
-|  ClkPort_IBUF_BUFG | vbc/jumpSpeed             |                      |               13 |             50 |         3.85 |
-|  ClkPort_IBUF_BUFG | vbc/marioSpeed[0]_i_1_n_0 |                      |               13 |             50 |         3.85 |
-+--------------------+---------------------------+----------------------+------------------+----------------+--------------+
++--------------------+---------------------------------+---------------------------------+------------------+----------------+--------------+
+|    Clock Signal    |          Enable Signal          |         Set/Reset Signal        | Slice Load Count | Bel Load Count | Bels / Slice |
++--------------------+---------------------------------+---------------------------------+------------------+----------------+--------------+
+|  ClkPort_IBUF_BUFG |                                 | BtnC_IBUF                       |                1 |              1 |         1.00 |
+|  dc/pulse          |                                 |                                 |                1 |              1 |         1.00 |
+|  dc/clk25_reg_n_0  |                                 |                                 |                1 |              1 |         1.00 |
+|  dc/clk25_reg_n_0  | dc/hCount[9]_i_1_n_0            |                                 |                1 |              1 |         1.00 |
+|  ClkPort_IBUF_BUFG | vbc/movement_counter[3]_i_2_n_0 | vbc/movement_counter[3]_i_1_n_0 |                1 |              4 |         4.00 |
+|  ClkPort_IBUF_BUFG |                                 | vbc/rgb_next[11]_i_1_n_0        |                2 |              8 |         4.00 |
+|  ClkPort_IBUF_BUFG | vbc/sprite_pixel_color          |                                 |                5 |              9 |         1.80 |
+|  dc/clk25_reg_n_0  | dc/hCount[9]_i_1_n_0            | dc/vCount[9]_i_1_n_0            |                3 |              9 |         3.00 |
+|  ClkPort_IBUF_BUFG | vbc/sel                         | BtnC_IBUF                       |                4 |             10 |         2.50 |
+|  dc/clk25_reg_n_0  |                                 | dc/hCount[9]_i_1_n_0            |                3 |             10 |         3.33 |
+|  ClkPort_IBUF_BUFG | vbc/V                           | BtnC_IBUF                       |                6 |             17 |         2.83 |
+|  ClkPort_IBUF_BUFG |                                 |                                 |               17 |             37 |         2.18 |
+|  ClkPort_IBUF_BUFG | vbc/movement_counter[3]_i_2_n_0 |                                 |               13 |             50 |         3.85 |
+|  ClkPort_IBUF_BUFG | vbc/jumpSpeed                   |                                 |               13 |             50 |         3.85 |
+|  ClkPort_IBUF_BUFG | vbc/jumpWait[49]_P_i_1_n_0      |                                 |               15 |             50 |         3.33 |
++--------------------+---------------------------------+---------------------------------+------------------+----------------+--------------+
 
 

@@ -3,13 +3,13 @@
 # SW Build 5076996 on Wed May 22 18:37:14 MDT 2024
 # IP Build 5075265 on Wed May 22 21:45:21 MDT 2024
 # SharedData Build 5076995 on Wed May 22 18:29:18 MDT 2024
-# Start of session at: Fri Apr 18 17:46:07 2025
-# Process ID: 7348
+# Start of session at: Mon Apr 21 20:51:32 2025
+# Process ID: 11516
 # Current directory: C:/Mario/EE354L_vga_demo/vga_demo.runs/synth_1
 # Command line: vivado.exe -log vga_top.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source vga_top.tcl
 # Log file: C:/Mario/EE354L_vga_demo/vga_demo.runs/synth_1/vga_top.vds
 # Journal file: C:/Mario/EE354L_vga_demo/vga_demo.runs/synth_1\vivado.jou
-# Running On        :GDESK-26
+# Running On        :GDESK-44
 # Platform          :Windows Server 2016 or Windows 10
 # Operating System  :19044
 # Processor Detail  :Intel(R) Xeon(R) Gold 6244 CPU @ 3.60GHz
@@ -19,6 +19,6 @@
 # Host memory       :34358 MB
 # Swap memory       :2147 MB
 # Total Virtual     :36506 MB
-# Available Virtual :28812 MB
+# Available Virtual :29444 MB
 #-----------------------------------------------------------
 source vga_top.tcl -notrace

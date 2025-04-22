@@ -21,252 +21,6 @@
 // // Author: Yue (Julien) Niu
 // // Description: Port from NEXYS3 to NEXYS4
 // //////////////////////////////////////////////////////////////////////////////////
-// // module vga_bitchange(
-// // 	input clk,
-// // 	input bright,
-// // 	input button,
-// // 	input [9:0] hCount, vCount,
-// // 	output reg [11:0] rgb,
-// // 	output reg [15:0] score
-// //    );
-	
-// // 	parameter BLACK = 12'b0000_0000_0000;
-// // 	parameter WHITE = 12'b1111_1111_1111;
-// // 	parameter RED   = 12'b1111_0000_0000;
-// // 	parameter GREEN = 12'b0000_1111_0000;
-// // 	parameter BLUE = 12'b0000_0000_1111;
-
-// // 	wire ground;
-// // 	wire mario;
-// // 	reg reset;
-// // 	reg[9:0] marioY;
-// // 	reg[49:0] marioSpeed; 
-
-// // 	initial begin
-// // 		marioY = 10'd320;
-// // 		score = 15'd0;
-// // 		reset = 1'b0;
-// // 	end
-	
-	
-// // 	always@ (*) // paint a white box on a red background
-// //     	if (~bright)
-// // 		rgb = BLACK; // force black if not bright
-// // 	 else if (mario == 1)
-// // 		rgb = WHITE;
-// // 	 else if (ground == 1)
-// // 		rgb = BLACK; // white box
-// // 	 else
-// // 		rgb = BLUE; // background color
-
-	
-// // 	always@ (posedge clk)
-// // 		begin
-// // 		marioSpeed = marioSpeed + 50'd1;
-// // 		if (marioSpeed >= 50'd500000) //500 thousand
-// // 			begin
-// // 			marioY = marioY + 10'd1;
-// // 			marioSpeed = 50'd0;
-// // 			if (marioY == 10'd779)
-// // 				begin
-// // 				marioY = 10'd0;
-// // 				end
-// // 			end
-// // 		end
-
-// // 	always@ (posedge clk)
-// // 		if ((reset == 1'b0) && (button == 1'b1) && (hCount >= 10'd144) && (hCount <= 10'd784) && (marioY >= 10'd400) && (marioY <= 10'd475))
-// // 			begin
-// // 			score = score + 16'd1;
-// // 			reset = 1'b1;
-// // 			end
-// // 		else if (marioY <= 10'd20)
-// // 			begin
-// // 			reset = 1'b0;
-// // 			end
-
-// // 	assign ground = ((hCount >= 10'd144) && (hCount <= 10'd784)) && ((vCount >= 10'd475) && (vCount <= 10'd519)) ? 1 : 0;
-
-// // 	assign mario = ((hCount >= 10'd340) && (hCount < 10'd358)) &&
-// // 				   ((vCount >= marioY) && (vCount <= marioY + 10'd24)) ? 1 : 0;
-	
-// // endmodule
-
-// `timescale 1ns / 1ps
-// //////////////////////////////////////////////////////////////////////////////////
-// // Block that can move left, right, and jump using solid color rectangles
-// //////////////////////////////////////////////////////////////////////////////////
-// module vga_bitchange(
-//     input clk,
-//     input rst,
-//     input bright,
-//     input btn_left,
-//     input btn_right,
-//     input btn_jump,
-//     input [9:0] hCount, vCount,
-//     output reg [11:0] rgb,
-// 	output reg [15:0] score
-// );
-
-//     parameter BLACK = 12'b0000_0000_0000;
-//     parameter WHITE = 12'b1111_1111_1111;
-//     parameter RED   = 12'b1111_0000_0000;
-//     parameter GREEN = 12'b0000_1111_0000;
-//     parameter BLUE = 12'b0001_0001_0101;
-    
-//     // Character position
-//     reg signed [9:0] posX = 10'd300;
-//     reg signed [9:0] posY = 10'd400;
-//     reg signed [6:0] V = 0;
-//     reg isJumping = 0;
-    
-//     // Character size
-//     parameter CHAR_WIDTH = 10'd18;
-//     parameter CHAR_HEIGHT = 10'd24;
-
-//     // Gravity and jump velocity
-//     parameter G = 1;
-//     parameter V_INIT = 7'd15;
-    
-//     wire [9:0] GROUND_Y = 10'd460;
-
-//     reg[49:0] marioSpeed;
-//     reg[49:0] jumpSpeed;
-
-//     // Update character position
-//     always @(posedge clk or posedge rst) begin
-//         if (rst) begin
-//             posX <= 10'd300;
-//             posY <= GROUND_Y;
-//             isJumping <= 0;
-//             V <= 0;
-//         end else begin
-//             // Left/Right Movement
-//             if (btn_left)
-//             begin
-//                 marioSpeed = marioSpeed + 50'd1;
-//                     if (marioSpeed >= 50'd500000) //500 thousand
-//                     begin
-//                         posX <= posX - 10'd1;
-//                         marioSpeed = 50'd0;
-//                     end
-//             end
-
-//             else if (btn_right)
-//             begin
-//                 marioSpeed = marioSpeed + 50'd1;
-//                 if (marioSpeed >= 50'd500000) //500 thousand
-//                     begin
-//                         posX <= posX + 10'd1;
-//                         marioSpeed = 50'd0;
-//                     end
-//             end
-
-//             // Jumping and Gravity
-//             if (isJumping) begin
-//                 jumpSpeed = jumpSpeed + 50'd1;
-//                 if (jumpSpeed >= 50'd500000) //500 thousand
-//                 begin
-//                     V <= V + G;
-//                     posY <= posY + V;
-//                     jumpSpeed = 50'd0;
-//                 end
-//                 // posY <= posY + V;
-
-//                 if (posY >= GROUND_Y) begin
-//                     posY <= GROUND_Y;
-//                     isJumping <= 0;
-//                     V <= 0;
-//                 end
-//             end 
-//             else if (btn_jump && posY >= GROUND_Y) begin
-//                 isJumping <= 10'd1;
-//                 V <= -V_INIT;
-//                 posY <= posY - V_INIT;
-//             end
-//         end
-//     end
-
-//     // Drawing logic
-//     wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
-//                    ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
-
-//     wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
-
-//     // mario sprite
-//     wire [15:0] mario_row_data;
-//     wire [4:0] relY = vCount - posY;
-//     wire [4:0] relX = hCount - posX;
-
-//     mario_rom marioSprite(
-//         .row(relY),
-//         .pixels(mario_row_data)
-//     );
-
-//     wire isMarioPixel = (hCount >= posX && hCount < posX + 18 &&
-//                         vCount >= posY && vCount < posY + 24 &&
-//                         mario_row_data[15 - relX]); // left to right
-
-//     always @(*) begin
-//         if (!bright)
-//             rgb = BLACK;
-//         else if (isMarioPixel)
-//             rgb = RED; // You can add shading/colors later
-//         else if (inGround)
-//             rgb = GREEN;
-//         else
-//             rgb = BLUE;
-//     end
-
-//     // always @(*) begin
-//     //     if (!bright)
-//     //         rgb = BLACK;
-//     //     else if (inBlock)
-//     //         rgb = WHITE;
-//     //     else if (inGround)
-//     //         rgb = GREEN;
-//     //     else
-//     //         rgb = BLUE;
-//     // end
-
-// endmodule
-
-
-// // module bram (
-// //     input wire clk,
-// //     input wire [13:0] addr,
-// //     output reg [15:0] data
-// // );
-
-// //     reg [15:0] mem_array [0:16383]; // Adjust size as needed
-
-// //     initial begin
-// //         $readmemh("m_hex.mem", mem_array);  // HEX format
-// //     end
-
-// //     always @(posedge clk) begin
-// //         data <= mem_array[addr];
-// //     end
-
-// // endmodule
-
-//  module mario_rom (
-//     input wire clk,
-//     input [13:0] row, 
-//     output reg [15:0] pixels
-// );
-
-//     reg [15:0] rom_data [0:16383];
-
-//     initial begin
-//         $readmemh("m_hex.mem", rom_data);
-//     end
-
-//     always @(posedge clk) begin
-//         pixels <= rom_data[row];
-//     end
-
-// endmodule
 
 
 // LATEST VERSION
@@ -290,16 +44,20 @@ module vga_bitchange(
     parameter BLUE = 12'h7AF;
 
     parameter TRANSPARENT_COLOR = 12'h000;
+
+    // Character size
+    parameter CHAR_WIDTH = 10'd32;
+    parameter CHAR_HEIGHT = 10'd32;
+
+    parameter SCREEN_LEFT  = 10'd143;
+    parameter SCREEN_RIGHT = 10'd734 - CHAR_WIDTH;
     
     // Character position
     reg signed [9:0] posX = 10'd300;
     reg signed [9:0] posY = 10'd400;
+    // reg signed [9:0] old_posX = 10'd300;
     reg signed [6:0] V = 0;
     reg isJumping = 0;
-    
-    // Character size
-    parameter CHAR_WIDTH = 10'd32;
-    parameter CHAR_HEIGHT = 10'd32;
 
     // Gravity and jump velocity
     parameter G = 1;
@@ -309,6 +67,11 @@ module vga_bitchange(
 
     reg[49:0] marioSpeed;
     reg[49:0] jumpSpeed;
+    reg [49:0] jumpWait;
+    reg [49:0] movement_counter; // counts how many pixels Mario has moved since last frame switch
+    reg [1:0] walkAnimation; // 0 for walk, 1 for jump
+
+    // reg[49:0] animateSpeed;
 
     // drawing logic variables
     wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
@@ -340,6 +103,19 @@ module vga_bitchange(
     wire [11:0] walk_left_sprite_color;
     wire [11:0] jump_right_sprite_color;
     wire [11:0] jump_left_sprite_color;
+
+    // instantiate map tiles
+    wire [11:0] ground_pixel;
+    wire [9:0] ground_sprite_addr = ((vCount - GROUND_Y) % TILE_SIZE) * TILE_SIZE + (hCount % TILE_SIZE);
+    parameter TILE_SIZE = 24; // adjust to match your sprite's tile size
+
+    ground_tile groundSprite(
+        .clk(clk),
+        .addr(ground_sprite_addr),
+        .pixel_data(ground_pixel)
+    );
+
+    wire isGroundTile = (vCount >= GROUND_Y && vCount < GROUND_Y + TILE_SIZE);
 
     // instantiate all sprites
     mario_idle_right marioIdleRightSprite(
@@ -379,7 +155,6 @@ module vga_bitchange(
     );
 
 
-
     // Update character position
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -390,12 +165,14 @@ module vga_bitchange(
     
         end else begin
 
-            // load default sprite first
-            // this will be overwritten by anything that happens after
-            if (marioDirection) // left 
-                sprite_pixel_color = idle_left_sprite_color;
-            else if (!marioDirection) // right
-                sprite_pixel_color = idle_right_sprite_color;
+            // load default sprite if nothing's happening
+            if (!btn_left && !btn_right && !isJumping) begin
+                if (marioDirection) // left 
+                    sprite_pixel_color = idle_left_sprite_color;
+                else if (!marioDirection) // right
+                    sprite_pixel_color = idle_right_sprite_color;
+            end
+
 
             // Left/Right Movement
             if (btn_left)
@@ -403,33 +180,61 @@ module vga_bitchange(
 
                 // set the direction flag
                 marioDirection = 1'b1;
-                // load the correct sprite
-                sprite_pixel_color = walk_left_sprite_color;
 
                 marioSpeed = marioSpeed + 50'd1;
                     if (marioSpeed >= 50'd500000) //500 thousand
                     begin
                         posX <= posX - 10'd1;
                         marioSpeed = 50'd0;
+                        movement_counter = movement_counter + 50'd1;
                     end
+
+                // set flag for animating sprite
+                if (movement_counter >= 50'd15)
+                begin 
+                    if (!walkAnimation)
+                    begin
+                        walkAnimation = 1'd1;
+                    end
+                    
+                    else
+                    begin
+                        walkAnimation = 1'd0;
+                    end
+                    movement_counter = 50'd0;
+                end
             end
 
             else if (btn_right)
             begin
                 // set direction flag
                 marioDirection = 1'b0;
-                // load the correct sprite
-                sprite_pixel_color = walk_right_sprite_color;
 
                 marioSpeed = marioSpeed + 50'd1;
                 if (marioSpeed >= 50'd500000) //500 thousand
                     begin
                         posX <= posX + 10'd1;
                         marioSpeed = 50'd0;
+                        movement_counter = movement_counter + 50'd1;
                     end
+
+                // animate sprite
+                if (movement_counter >= 50'd15)
+                begin 
+                    if (!walkAnimation)
+                    begin
+                        walkAnimation = 1'd1;
+                    end
+                    else
+                    begin
+                        walkAnimation = 1'd0;
+                    end
+                    movement_counter = 50'd0;
+                end
             end
 
             // Jumping and Gravity
+
             if (isJumping) begin
 
                 // set the correct sprite depending on which direction mario was facing
@@ -446,22 +251,40 @@ module vga_bitchange(
                     V <= V + G;
                     posY <= posY + V;
                     jumpSpeed = 50'd0;
+                    jumpWait = jumpWait + 50'd1;
                 end
                 // posY <= posY + V;
 
-                if (posY >= GROUND_Y) begin
+                if (posY >= GROUND_Y) begin // if on the ground
                     posY <= GROUND_Y;
                     isJumping <= 0;
                     V <= 0;
+                    jumpWait <= 0;
                 end
             end 
-            else if (btn_jump && posY >= GROUND_Y) begin
+            else if (btn_jump && posY >= GROUND_Y && jumpWait >= 50'd100000) begin
                 isJumping <= 10'd1;
                 V <= -V_INIT;
                 posY <= posY - V_INIT;
             end
+
+
+            // walking animation control
+            if (!walkAnimation && btn_left) begin
+                sprite_pixel_color = walk_left_sprite_color;
+            end
+            else if (!walkAnimation && btn_right) begin
+                sprite_pixel_color = walk_right_sprite_color;
+            end
+            else if (walkAnimation && btn_left) begin
+                sprite_pixel_color = jump_left_sprite_color;
+            end
+            else if (walkAnimation && btn_right) begin
+                sprite_pixel_color = jump_right_sprite_color;
+            end
         end
     end
+
 
 
 // ----------------------------------------- HELLO MADISON I ADDED THIS PART, MUST CHECK IF THIS WORKS OR NOT ----------------------------
@@ -535,7 +358,7 @@ module vga_bitchange(
             rgb_next <= sprite_pixel_color;
         end
         else if (inGround_d)
-            rgb_next <= GREEN;
+            rgb_next <= ground_pixel;
         else
             rgb_next <= BLUE;
 
