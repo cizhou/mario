@@ -1,0 +1,511 @@
+
+*** Running vivado
+    with args -log vga_top.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source vga_top.tcl
+
+
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:35:27 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Tue Apr 22 16:40:40 2025
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source vga_top.tcl -notrace
+Command: read_checkpoint -auto_incremental -incremental C:/Users/amsin/Desktop/project_1/project_1.srcs/utils_1/imports/synth_1/vga_top.dcp
+INFO: [Vivado 12-5825] Read reference checkpoint from C:/Users/amsin/Desktop/project_1/project_1.srcs/utils_1/imports/synth_1/vga_top.dcp for incremental synthesis
+INFO: [Vivado 12-7989] Please ensure there are no constraint changes
+Command: synth_design -top vga_top -part xc7a100tcsg324-1
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7a100t'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7a100t'
+INFO: [Device 21-403] Loading part xc7a100tcsg324-1
+INFO: [Designutils 20-5440] No compile time benefit to using incremental synthesis; A full resynthesis will be run
+INFO: [Designutils 20-4379] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 8980
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 1043.637 ; gain = 469.535
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-6901] identifier 'TILE_SIZE' is used before its declaration [C:/Users/amsin/Desktop/src/vga_bitchange.v:109]
+WARNING: [Synth 8-6901] identifier 'TILE_SIZE' is used before its declaration [C:/Users/amsin/Desktop/src/vga_bitchange.v:109]
+WARNING: [Synth 8-6901] identifier 'TILE_SIZE' is used before its declaration [C:/Users/amsin/Desktop/src/vga_bitchange.v:109]
+INFO: [Synth 8-6157] synthesizing module 'vga_top' [C:/Users/amsin/Desktop/src/A7_vga_top.v:24]
+INFO: [Synth 8-6157] synthesizing module 'display_controller' [C:/Users/amsin/Desktop/src/display_controller.v:24]
+INFO: [Synth 8-6155] done synthesizing module 'display_controller' (0#1) [C:/Users/amsin/Desktop/src/display_controller.v:24]
+INFO: [Synth 8-6157] synthesizing module 'vga_bitchange' [C:/Users/amsin/Desktop/src/vga_bitchange.v:27]
+INFO: [Synth 8-6157] synthesizing module 'ground_tile' [C:/Users/amsin/Desktop/src/tiles_sprite_load.v:8]
+INFO: [Synth 8-3876] $readmem data file './tiles/24x24_ground.mem' is read successfully [C:/Users/amsin/Desktop/src/tiles_sprite_load.v:18]
+INFO: [Synth 8-6155] done synthesizing module 'ground_tile' (0#1) [C:/Users/amsin/Desktop/src/tiles_sprite_load.v:8]
+INFO: [Synth 8-6157] synthesizing module 'mario_idle_right' [C:/Users/amsin/Desktop/src/mario_sprite_load.v:83]
+INFO: [Synth 8-3876] $readmem data file './32x32_mario/32x32_mario_idle_right.mem' is read successfully [C:/Users/amsin/Desktop/src/mario_sprite_load.v:93]
+INFO: [Synth 8-6155] done synthesizing module 'mario_idle_right' (0#1) [C:/Users/amsin/Desktop/src/mario_sprite_load.v:83]
+INFO: [Synth 8-6157] synthesizing module 'mario_idle_left' [C:/Users/amsin/Desktop/src/mario_sprite_load.v:102]
+INFO: [Synth 8-3876] $readmem data file './32x32_mario/32x32_mario_idle_left.mem' is read successfully [C:/Users/amsin/Desktop/src/mario_sprite_load.v:112]
+INFO: [Synth 8-6155] done synthesizing module 'mario_idle_left' (0#1) [C:/Users/amsin/Desktop/src/mario_sprite_load.v:102]
+INFO: [Synth 8-6157] synthesizing module 'mario_walk_right' [C:/Users/amsin/Desktop/src/mario_sprite_load.v:64]
+INFO: [Synth 8-3876] $readmem data file './32x32_mario/32x32_mario_walk_right.mem' is read successfully [C:/Users/amsin/Desktop/src/mario_sprite_load.v:74]
+INFO: [Synth 8-6155] done synthesizing module 'mario_walk_right' (0#1) [C:/Users/amsin/Desktop/src/mario_sprite_load.v:64]
+INFO: [Synth 8-6157] synthesizing module 'mario_walk_left' [C:/Users/amsin/Desktop/src/mario_sprite_load.v:45]
+INFO: [Synth 8-3876] $readmem data file './32x32_mario/32x32_mario_walk_left.mem' is read successfully [C:/Users/amsin/Desktop/src/mario_sprite_load.v:55]
+INFO: [Synth 8-6155] done synthesizing module 'mario_walk_left' (0#1) [C:/Users/amsin/Desktop/src/mario_sprite_load.v:45]
+INFO: [Synth 8-6157] synthesizing module 'mario_jump_left' [C:/Users/amsin/Desktop/src/mario_sprite_load.v:26]
+INFO: [Synth 8-3876] $readmem data file './32x32_mario/32x32_mario_jump_left.mem' is read successfully [C:/Users/amsin/Desktop/src/mario_sprite_load.v:36]
+INFO: [Synth 8-6155] done synthesizing module 'mario_jump_left' (0#1) [C:/Users/amsin/Desktop/src/mario_sprite_load.v:26]
+INFO: [Synth 8-6157] synthesizing module 'mario_jump_right' [C:/Users/amsin/Desktop/src/mario_sprite_load.v:7]
+INFO: [Synth 8-3876] $readmem data file './32x32_mario/32x32_mario_jump_right.mem' is read successfully [C:/Users/amsin/Desktop/src/mario_sprite_load.v:17]
+INFO: [Synth 8-6155] done synthesizing module 'mario_jump_right' (0#1) [C:/Users/amsin/Desktop/src/mario_sprite_load.v:7]
+WARNING: [Synth 8-6090] variable 'jumpWait' is written by both blocking and non-blocking assignments, entire logic could be removed [C:/Users/amsin/Desktop/src/vga_bitchange.v:263]
+INFO: [Synth 8-6155] done synthesizing module 'vga_bitchange' (0#1) [C:/Users/amsin/Desktop/src/vga_bitchange.v:27]
+INFO: [Synth 8-6157] synthesizing module 'counter' [C:/Users/amsin/Desktop/src/counter.v:21]
+INFO: [Synth 8-6155] done synthesizing module 'counter' (0#1) [C:/Users/amsin/Desktop/src/counter.v:21]
+INFO: [Synth 8-6155] done synthesizing module 'vga_top' (0#1) [C:/Users/amsin/Desktop/src/A7_vga_top.v:24]
+WARNING: [Synth 8-7137] Register sprite_pixel_color_reg in module vga_bitchange has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/amsin/Desktop/src/vga_bitchange.v:171]
+WARNING: [Synth 8-7137] Register marioDirection_reg in module vga_bitchange has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/amsin/Desktop/src/vga_bitchange.v:170]
+WARNING: [Synth 8-7137] Register marioSpeed_reg in module vga_bitchange has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/amsin/Desktop/src/vga_bitchange.v:184]
+WARNING: [Synth 8-7137] Register movement_counter_reg in module vga_bitchange has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/amsin/Desktop/src/vga_bitchange.v:189]
+WARNING: [Synth 8-7137] Register walkAnimation_reg in module vga_bitchange has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/amsin/Desktop/src/vga_bitchange.v:195]
+WARNING: [Synth 8-7137] Register jumpWait_reg in module vga_bitchange has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/amsin/Desktop/src/vga_bitchange.v:237]
+WARNING: [Synth 8-7137] Register jumpSpeed_reg in module vga_bitchange has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/amsin/Desktop/src/vga_bitchange.v:249]
+WARNING: [Synth 8-3848] Net score in module/entity vga_bitchange does not have driver. [C:/Users/amsin/Desktop/src/vga_bitchange.v:36]
+WARNING: [Synth 8-3917] design vga_top has port An4 driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port An5 driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port An6 driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port An7 driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port Dp driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port QuadSpiFlashCS driven by constant 1
+WARNING: [Synth 8-7129] Port score[15] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[14] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[13] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[12] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[11] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[10] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[9] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[8] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[7] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[6] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[5] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[4] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[3] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[2] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[1] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[0] in module vga_bitchange is either unconnected or has no load
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 1158.059 ; gain = 583.957
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 1158.059 ; gain = 583.957
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 1158.059 ; gain = 583.957
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.008 . Memory (MB): peak = 1158.059 ; gain = 0.000
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [C:/Users/amsin/Desktop/src/A7_nexys7.xdc]
+WARNING: [Vivado 12-584] No ports matched 'RamCS'. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:113]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:113]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'RamCS'. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:114]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:114]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'MemOE'. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:116]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:116]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'MemOE'. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:117]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:117]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'MemWR'. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:119]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:119]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'MemWR'. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:120]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [C:/Users/amsin/Desktop/src/A7_nexys7.xdc:120]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+Finished Parsing XDC File [C:/Users/amsin/Desktop/src/A7_nexys7.xdc]
+INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [C:/Users/amsin/Desktop/src/A7_nexys7.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/vga_top_propImpl.xdc].
+Resolution: To avoid this warning, move constraints listed in [.Xil/vga_top_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1247.320 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.003 . Memory (MB): peak = 1247.320 ; gain = 0.000
+INFO: [Designutils 20-5440] No compile time benefit to using incremental synthesis; A full resynthesis will be run
+INFO: [Designutils 20-4379] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:09 ; elapsed = 00:00:11 . Memory (MB): peak = 1247.320 ; gain = 673.219
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7a100tcsg324-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:09 ; elapsed = 00:00:11 . Memory (MB): peak = 1247.320 ; gain = 673.219
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:09 ; elapsed = 00:00:11 . Memory (MB): peak = 1247.320 ; gain = 673.219
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:10 ; elapsed = 00:00:11 . Memory (MB): peak = 1247.320 ; gain = 673.219
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input   50 Bit       Adders := 4     
+	   2 Input   32 Bit       Adders := 1     
+	   3 Input   11 Bit       Adders := 2     
+	   2 Input   10 Bit       Adders := 7     
+	   2 Input    7 Bit       Adders := 1     
+	   3 Input    5 Bit       Adders := 2     
++---Registers : 
+	               50 Bit    Registers := 2     
+	               12 Bit    Registers := 4     
+	               10 Bit    Registers := 3     
+	                7 Bit    Registers := 7     
+	                2 Bit    Registers := 2     
+	                1 Bit    Registers := 7     
++---ROMs : 
+	                    ROMs := 6     
++---Muxes : 
+	   2 Input   50 Bit        Muxes := 8     
+	 577 Input   12 Bit        Muxes := 1     
+	   2 Input   12 Bit        Muxes := 6     
+	   2 Input   10 Bit        Muxes := 3     
+	   2 Input    7 Bit        Muxes := 2     
+	   4 Input    4 Bit        Muxes := 2     
+	   2 Input    2 Bit        Muxes := 18    
+	   2 Input    1 Bit        Muxes := 13    
+	   5 Input    1 Bit        Muxes := 1     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 240 (col length:80)
+BRAMs: 270 (col length: RAMB18 80 RAMB36 40)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
+WARNING: [Synth 8-3917] design vga_top has port An4 driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port An5 driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port An6 driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port An7 driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port Dp driven by constant 1
+WARNING: [Synth 8-3917] design vga_top has port QuadSpiFlashCS driven by constant 1
+WARNING: [Synth 8-7129] Port score[15] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[14] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[13] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[12] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[11] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[10] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[9] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[8] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[7] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[6] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[5] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[4] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[3] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[2] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[1] in module vga_bitchange is either unconnected or has no load
+WARNING: [Synth 8-7129] Port score[0] in module vga_bitchange is either unconnected or has no load
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[9]/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'GND' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[6]/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'GND' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[4]/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'GND' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[3]/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'VCC' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[2]/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'VCC' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[1]/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'GND' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[0]/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'GND' [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:296]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[8]__0/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'VCC' [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[7]__0/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'GND' [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 1st driver pin 'vbc/posX_reg[5]__0/Q' [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+CRITICAL WARNING: [Synth 8-6859] multi-driven net on pin Q with 2nd driver pin 'VCC' [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+CRITICAL WARNING: [Synth 8-6858] multi-driven net Q is connected to at least one constant driver which has been preserved, other driver is ignored [C:/Users/amsin/Desktop/src/vga_bitchange.v:77]
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[49]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[49]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[48]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[48]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[47]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[47]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[46]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[46]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[45]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[45]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[44]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[44]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[43]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[43]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[42]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[42]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[41]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[41]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[40]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[40]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[39]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[39]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[38]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[38]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[37]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[37]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[36]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[36]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[35]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[35]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[34]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[34]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[33]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[33]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[32]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[32]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[31]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[31]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[30]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[30]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[29]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[29]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[28]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[28]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[27]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[27]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[26]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[26]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[25]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[25]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[24]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[24]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[23]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[23]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[22]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[22]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[21]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[21]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[20]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[20]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[19]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[19]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[18]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[18]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[17]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[17]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[16]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[16]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[15]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[15]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[14]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[14]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[13]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[13]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[12]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[12]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[11]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[11]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[10]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[10]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[9]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[9]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[8]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[8]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[7]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[7]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[6]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[6]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[5]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[5]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[4]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[4]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[3]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[3]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[2]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[2]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[1]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[1]_C) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[0]_LDC) is unused and will be removed from module vga_bitchange.
+WARNING: [Synth 8-3332] Sequential element (jumpWait_reg[0]_C) is unused and will be removed from module vga_bitchange.
+INFO: [Common 17-14] Message 'Synth 8-3332' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:14 ; elapsed = 00:00:16 . Memory (MB): peak = 1247.320 ; gain = 673.219
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+
+ROM: Preliminary Mapping Report
++--------------+-------------------------------------+---------------+----------------+
+|Module Name   | RTL Object                          | Depth x Width | Implemented As | 
++--------------+-------------------------------------+---------------+----------------+
+|vga_bitchange | marioWalkLeftSprite/pixel_data_reg  | 1024x7        | Block RAM      | 
+|vga_bitchange | marioWalkRightSprite/pixel_data_reg | 1024x7        | Block RAM      | 
+|vga_bitchange | marioJumpLeftSprite/pixel_data_reg  | 1024x7        | Block RAM      | 
+|vga_bitchange | marioJumpRightSprite/pixel_data_reg | 1024x7        | Block RAM      | 
+|vga_bitchange | marioIdleRightSprite/pixel_data_reg | 1024x7        | Block RAM      | 
+|vga_bitchange | marioIdleLeftSprite/pixel_data_reg  | 1024x7        | Block RAM      | 
++--------------+-------------------------------------+---------------+----------------+
+
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:18 ; elapsed = 00:00:20 . Memory (MB): peak = 1351.070 ; gain = 776.969
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:19 ; elapsed = 00:00:21 . Memory (MB): peak = 1400.262 ; gain = 826.160
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+INFO: [Synth 8-7052] The timing for the instance vbc/marioWalkLeftSprite/pixel_data_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance vbc/marioWalkRightSprite/pixel_data_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance vbc/marioJumpLeftSprite/pixel_data_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance vbc/marioJumpRightSprite/pixel_data_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance vbc/marioIdleRightSprite/pixel_data_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance vbc/marioIdleLeftSprite/pixel_data_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:19 ; elapsed = 00:00:21 . Memory (MB): peak = 1407.137 ; gain = 833.035
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:21 ; elapsed = 00:00:24 . Memory (MB): peak = 1583.168 ; gain = 1009.066
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:21 ; elapsed = 00:00:24 . Memory (MB): peak = 1583.168 ; gain = 1009.066
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:21 ; elapsed = 00:00:24 . Memory (MB): peak = 1583.168 ; gain = 1009.066
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:21 ; elapsed = 00:00:24 . Memory (MB): peak = 1583.168 ; gain = 1009.066
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:21 ; elapsed = 00:00:24 . Memory (MB): peak = 1583.215 ; gain = 1009.113
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:21 ; elapsed = 00:00:24 . Memory (MB): peak = 1583.215 ; gain = 1009.113
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+---------+------+
+|      |Cell     |Count |
++------+---------+------+
+|1     |BUFG     |     1|
+|2     |CARRY4   |   121|
+|3     |LUT1     |    24|
+|4     |LUT2     |   161|
+|5     |LUT3     |    98|
+|6     |LUT4     |    82|
+|7     |LUT5     |    94|
+|8     |LUT6     |   168|
+|9     |MUXF7    |    22|
+|10    |MUXF8    |     8|
+|11    |RAMB18E1 |     6|
+|17    |FDCE     |    13|
+|18    |FDPE     |     5|
+|19    |FDRE     |   234|
+|20    |IBUF     |     5|
+|21    |OBUF     |    31|
++------+---------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:21 ; elapsed = 00:00:24 . Memory (MB): peak = 1583.215 ; gain = 1009.113
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 30 critical warnings and 123 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:17 ; elapsed = 00:00:23 . Memory (MB): peak = 1583.215 ; gain = 919.852
+Synthesis Optimization Complete : Time (s): cpu = 00:00:22 ; elapsed = 00:00:24 . Memory (MB): peak = 1583.215 ; gain = 1009.113
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.006 . Memory (MB): peak = 1583.215 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 157 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1583.215 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Synth Design complete | Checksum: 158214b9
+INFO: [Common 17-83] Releasing license: Synthesis
+57 Infos, 163 Warnings, 36 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:25 ; elapsed = 00:00:29 . Memory (MB): peak = 1583.215 ; gain = 1214.270
+INFO: [runtcl-6] Synthesis results are not added to the cache due to CRITICAL_WARNING
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.003 . Memory (MB): peak = 1583.215 ; gain = 0.000
+INFO: [Common 17-1381] The checkpoint 'C:/Users/amsin/Desktop/project_1/project_1.runs/synth_1/vga_top.dcp' has been generated.
+INFO: [Vivado 12-24828] Executing command : report_utilization -file vga_top_utilization_synth.rpt -pb vga_top_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Tue Apr 22 16:41:13 2025...
