@@ -45,6 +45,10 @@ module vga_bitchange(
 
     parameter TRANSPARENT_COLOR = 12'h000;
 
+    // Character size
+    parameter CHAR_WIDTH = 10'd32;
+    parameter CHAR_HEIGHT = 10'd32;
+
     parameter SCREEN_LEFT  = 10'd143;
     parameter SCREEN_RIGHT = 10'd734 - CHAR_WIDTH;
     
@@ -54,10 +58,6 @@ module vga_bitchange(
     // reg signed [9:0] old_posX = 10'd300;
     reg signed [6:0] V = 0;
     reg isJumping = 0;
-    
-    // Character size
-    parameter CHAR_WIDTH = 10'd32;
-    parameter CHAR_HEIGHT = 10'd32;
 
     // Gravity and jump velocity
     parameter G = 1;
@@ -68,7 +68,8 @@ module vga_bitchange(
     reg[49:0] marioSpeed;
     reg[49:0] jumpSpeed;
     reg [49:0] jumpWait;
-    reg [9:0] movement_counter; // counts how many pixels Mario has moved since last frame switch
+    reg [49:0] movement_counter; // counts how many pixels Mario has moved since last frame switch
+    reg [1:0] walkAnimation; // 0 for walk, 1 for jump
 
     // reg[49:0] animateSpeed;
 
@@ -102,6 +103,21 @@ module vga_bitchange(
     wire [11:0] walk_left_sprite_color;
     wire [11:0] jump_right_sprite_color;
     wire [11:0] jump_left_sprite_color;
+
+    // instantiate map tiles
+    wire [11:0] ground_pixel;
+    wire [9:0] ground_sprite_addr = ((vCount - GROUND_Y) % TILE_SIZE) * TILE_SIZE + (hCount % TILE_SIZE);
+    parameter TILE_SIZE = 24; // adjust to match your sprite's tile size
+
+// ----------------------------------------- LOADING SPRITES -----------------------------------------
+
+    ground_tile groundSprite(
+        .clk(clk),
+        .addr(ground_sprite_addr),
+        .pixel_data(ground_pixel)
+    );
+
+    wire isGroundTile = (vCount >= GROUND_Y && vCount < GROUND_Y + TILE_SIZE);
 
     // instantiate all sprites
     mario_idle_right marioIdleRightSprite(
@@ -141,8 +157,7 @@ module vga_bitchange(
     );
 
 
-
-    // Update character position
+// ----------------------------------------- CHARACTER MOVEMENT -----------------------------------------
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             posX <= 10'd300;
@@ -152,12 +167,14 @@ module vga_bitchange(
     
         end else begin
 
-            // load default sprite first
-            // this will be overwritten by anything that happens after
-            if (marioDirection) // left 
-                sprite_pixel_color = idle_left_sprite_color;
-            else if (!marioDirection) // right
-                sprite_pixel_color = idle_right_sprite_color;
+            // load default sprite if nothing's happening
+            if (!btn_left && !btn_right && !isJumping) begin
+                if (marioDirection) // left 
+                    sprite_pixel_color = idle_left_sprite_color;
+                else if (!marioDirection) // right
+                    sprite_pixel_color = idle_right_sprite_color;
+            end
+
 
             // Left/Right Movement
             if (btn_left)
@@ -166,58 +183,29 @@ module vga_bitchange(
                 // set the direction flag
                 marioDirection = 1'b1;
 
-                // animate the correct sprite
-
-                // if (old_posX == posX + 10)
-                // begin 
-                //     if (sprite_pixel_color == walk_left_sprite_color)
-                //     begin
-                //         sprite_pixel_color = jump_left_sprite_color;
-                //     end
-                    
-                //     else
-                //     begin
-                //         sprite_pixel_color = walk_left_sprite_color;
-                //     end
-                //     old_posX <= posX;
-                // end
-
-                // animateSpeed = animateSpeed + 50'd1;
-                //     if (animateSpeed >= 50'd1000000000) // 1bil
-                //     begin 
-                //         if (sprite_pixel_color == walk_left_sprite_color)
-                //         begin
-                //             sprite_pixel_color = jump_left_sprite_color;
-                //         end
-                //         else
-                //         begin
-                //             sprite_pixel_color = walk_left_sprite_color;
-                //         end
-                //     end
-
                 marioSpeed = marioSpeed + 50'd1;
                     if (marioSpeed >= 50'd500000) //500 thousand
                     begin
-                        posX <= posX - 10'd1;
+                        if (posX > SCREEN_LEFT)
+                            posX <= posX - 10'd1;
                         marioSpeed = 50'd0;
-                        movement_counter = movement_counter + 10'd1;
+                        movement_counter = movement_counter + 50'd1;
                     end
 
-                // animate sprite
-                if (movement_counter >= 10'd5)
+                // set flag for animating sprite
+                if (movement_counter >= 50'd15)
                 begin 
-                    if (sprite_pixel_color == walk_left_sprite_color)
+                    if (!walkAnimation)
                     begin
-                        sprite_pixel_color = jump_left_sprite_color;
+                        walkAnimation = 1'd1;
                     end
                     
                     else
                     begin
-                        sprite_pixel_color = walk_left_sprite_color;
+                        walkAnimation = 1'd0;
                     end
-                    movement_counter = 10'd0;
+                    movement_counter = 50'd0;
                 end
-
             end
 
             else if (btn_right)
@@ -225,59 +213,27 @@ module vga_bitchange(
                 // set direction flag
                 marioDirection = 1'b0;
 
-                // animate the correct sprite
-                
-                // if (old_posX == posX - 10)
-                // begin 
-                //     if (sprite_pixel_color == walk_right_sprite_color)
-                //     begin
-                //         sprite_pixel_color = jump_right_sprite_color;
-                //     end
-
-                //     else
-                //     begin
-                //         sprite_pixel_color = walk_right_sprite_color;
-                //     end
-                    
-                //     old_posX <= posX;
-                // end
-
-
-                // animateSpeed = animateSpeed + 50'd1;
-                //     if (animateSpeed >= 50'd1000000000) // 1bil
-                //     begin 
-                //         if (sprite_pixel_color == walk_right_sprite_color)
-                //         begin
-                //             sprite_pixel_color = jump_right_sprite_color;
-                //         end
-                //         else
-                //         begin
-                //             sprite_pixel_color = walk_right_sprite_color;
-                //         end
-                //     end
-
                 marioSpeed = marioSpeed + 50'd1;
                 if (marioSpeed >= 50'd500000) //500 thousand
                     begin
-                        posX <= posX + 10'd1;
+                         if ((posX < SCREEN_RIGHT))
+                           posX <= posX + 10'd1;
                         marioSpeed = 50'd0;
-                        movement_counter = movement_counter + 10'd1;
+                        movement_counter = movement_counter + 50'd1;
                     end
 
                 // animate sprite
-                if (movement_counter >= 10'd5)
+                if (movement_counter >= 50'd15)
                 begin 
-                    if (sprite_pixel_color == walk_right_sprite_color)
+                    if (!walkAnimation)
                     begin
-                        sprite_pixel_color = jump_right_sprite_color;
+                        walkAnimation = 1'd1;
                     end
-
                     else
                     begin
-                        sprite_pixel_color = walk_right_sprite_color;
+                        walkAnimation = 1'd0;
                     end
-                    
-                    movement_counter = 10'd0;
+                    movement_counter = 50'd0;
                 end
             end
 
@@ -295,6 +251,7 @@ module vga_bitchange(
                 end
 
                 jumpSpeed = jumpSpeed + 50'd1;
+                
                 if (jumpSpeed >= 50'd1000000) //500 thousand
                 begin
                     V <= V + G;
@@ -310,56 +267,90 @@ module vga_bitchange(
                     jumpWait <= 0;
                 end
             end 
-            else if (btn_jump && posY >= GROUND_Y && jumpWait >= 50'd1000000) begin
+            else if (btn_jump && posY >= GROUND_Y && jumpWait >= 50'd100000) begin
                 isJumping <= 10'd1;
                 V <= -V_INIT;
                 posY <= posY - V_INIT;
             end
+
+
+            // walking animation control
+            if (!walkAnimation && btn_left) begin
+                sprite_pixel_color = walk_left_sprite_color;
+            end
+            else if (!walkAnimation && btn_right) begin
+                sprite_pixel_color = walk_right_sprite_color;
+            end
+            else if (walkAnimation && btn_left) begin
+                sprite_pixel_color = jump_left_sprite_color;
+            end
+            else if (walkAnimation && btn_right) begin
+                sprite_pixel_color = jump_right_sprite_color;
+            end
         end
     end
 
+// ------------------------------------------PLATFORMS-----------------------------------------------
 
-// ----------------------------------------- HELLO MADISON I ADDED THIS PART, MUST CHECK IF THIS WORKS OR NOT ----------------------------
-    // CHARACTER DEDUCTIONS
+    reg isPlatformPixel;
+    reg [11:0] selected_platform_pixel;
+    reg [9:0] platform_sprite_addr;
+
     
-    // parameter SCREEN_LEFT  = 10'd143;
-    // parameter SCREEN_RIGHT = 10'd734 - CHAR_WIDTH;
-    // always @(posedge clk or posedge rst) begin
-    //     if (rst) begin
-    //         posX <= 10'd300;
-    //     end else begin
-    //         if (posX < SCREEN_LEFT)
-    //             posX <= SCREEN_LEFT;
-    //         else if (posX > SCREEN_RIGHT)
-    //             posX <= SCREEN_RIGHT;
-    //     end
-    // end
-// ---------------------------------------------------------------------------------------------------------------------------
+    platform_tile platformSprite (
+        .clk(clk),
+        .addr(platform_sprite_addr),
+        .pixel_data(platform_pixel)
+    );
 
-    // Drawing logic
-    // wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
-    //                ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
+    // Platform definitions
+    parameter NUM_PLATFORMS = 3;
 
-    // wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
+    reg [9:0] platform_x[0:NUM_PLATFORMS-1];
+    reg [9:0] platform_y[0:NUM_PLATFORMS-1];
 
-    // // mario sprite
-    // // wire [15:0] mario_row_data;
-    // wire [4:0] relY = vCount - posY;
-    // wire [4:0] relX = hCount - posX;
+    // Platform initialization (inside an `initial` block)
+    initial begin
+        platform_x[0] = 500; platform_y[0] = 360;
+        platform_x[1] = 250; platform_y[1] = 300;
+        platform_x[2] = 500; platform_y[2] = 220;
+    end
 
-    // wire [1:0] inSpriteBounds = hCount >= posX && hCount < posX + CHAR_WIDTH &&
-    //                     vCount >= posY && vCount < posY + CHAR_HEIGHT;
+    // Handle platform sprite logic
+    always @(*) begin
+        isPlatformPixel = 0;
+        selected_platform_pixel = 12'hF00; // fallback color
+        platform_sprite_addr = 0;
 
-    // assign sprite_addr = relY * CHAR_WIDTH + relX; // 1D address for pixel color
-    // wire [9:0] sprite_addr = inSpriteBounds ? (relY * CHAR_WIDTH + relX) : 0;
-    // // holds the 12-bit color hex
-    // wire [11:0] sprite_pixel_color;
+        // Platform 0
+        if (hCount >= platform_x[0] && hCount < platform_x[0] + TILE_SIZE &&
+            vCount >= platform_y[0] && vCount < platform_y[0] + TILE_SIZE) begin
+            isPlatformPixel = 1;
+            platform_sprite_addr = (vCount - platform_y[0]) * TILE_SIZE + (hCount - platform_x[0]);
+        end
+        // Platform 1
+        else if (hCount >= platform_x[1] && hCount < platform_x[1] + TILE_SIZE &&
+                vCount >= platform_y[1] && vCount < platform_y[1] + TILE_SIZE) begin
+            isPlatformPixel = 1;
+            platform_sprite_addr = (vCount - platform_y[1]) * TILE_SIZE + (hCount - platform_x[1]);
+        end
+        // Platform 2
+        else if (hCount >= platform_x[2] && hCount < platform_x[2] + TILE_SIZE &&
+                vCount >= platform_y[2] && vCount < platform_y[2] + TILE_SIZE) begin
+            isPlatformPixel = 1;
+            platform_sprite_addr = (vCount - platform_y[2]) * TILE_SIZE + (hCount - platform_x[2]);
+        end
 
-    // mario_jump_right marioSprite(
-    //     .clk(clk),
-    //     .addr(sprite_addr),
-    //     .pixel_data(sprite_pixel_color)
-    // );
+        // Only grab sprite pixel if we're inside a platform
+        if (isPlatformPixel)
+            selected_platform_pixel = platform_pixel;
+    end
+
+
+
+
+
+// ------------------------------------------------------------------------------------------------------------------------------
 
     // Pipeline registers
     reg [11:0] rgb_next;
@@ -390,7 +381,9 @@ module vga_bitchange(
             rgb_next <= sprite_pixel_color;
         end
         else if (inGround_d)
-            rgb_next <= GREEN;
+            rgb_next <= ground_pixel;
+        else if (isPlatformPixel)
+            rgb_next <= selected_platform_pixel;
         else
             rgb_next <= BLUE;
 
@@ -398,115 +391,4 @@ module vga_bitchange(
         rgb <= rgb_next;
     end
 
-    // wire isMarioPixel = (hCount >= posX && hCount < posX + 12 &&
-    //                     vCount >= posY && vCount < posY + 16 &&
-    //                     sprite_pixel_color != 8'h03); // left to right
-
-    // wire [11:0] color_12bit;
-
-    // // convert to 12-bit
-    // wire [2:0] red_8bit   = sprite_pixel_color[7:5];  // 3-bit red
-    // wire [2:0] green_8bit = sprite_pixel_color[4:2];  // 3-bit green
-    // wire [1:0] blue_8bit  = sprite_pixel_color[1:0];  // 2-bit blue
-
-    // assign color_12bit = {red_8bit, red_8bit, green_8bit, green_8bit, blue_8bit, blue_8bit};
-
-    // always @(*) begin
-    //     if (!bright)
-    //         rgb = BLACK;
-    //     else if (isMarioPixel)
-    //         rgb = color_12bit; 
-    //     else if (inGround)
-    //         rgb = GREEN;
-    //     else
-    //         rgb = BLUE;
-    // end
-
-    // always @(*) begin
-    //     if (!bright)
-    //         rgb = BLACK;
-    //     else if (inBlock)
-    //         rgb = WHITE;
-    //     else if (inGround)
-    //         rgb = GREEN;
-    //     else
-    //         rgb = BLUE;
-    // end
-
 endmodule
-
-// reading from a mem file
-// move the mem file into a "ROM" array (for an n-pixel image, mem file should have n rows)
-//      each row should contain the information for a single pixel
-//      for our mem file, each pixel will be compressed 8-bit RGB formatted
-// and every clock, extract the next element from the array and return it
-//  module mario_jump_right (
-//     input wire clk,
-//     input wire [9:0] addr,        // 10-bit address: 2^10 = 1024
-//     output reg [11:0] pixel_data   // 8-bit RGB (3-3-2)
-// );
-
-//     // 32x32 = 1024 pixels
-//     reg [11:0] rom [0:1023];        // 1024 total pixels
-
-//     initial begin
-//         $readmemh("C:/Mario/m_hex.mem", rom);
-//     end
-
-//     always @(posedge clk) begin
-//         pixel_data <= rom[addr];
-//     end
-
-//     // initial begin
-//     // for (integer i = 0; i < 192; i = i + 1)
-//     //     rom[i] = 8'hFF;  // white
-//     // end
-
-// endmodule
-
-// reg [7:0] rom_data [0:431];
-
-    // initial begin
-    //     $readmemh("m_hex.mem", rom_data);
-    // end
-
-    // always @(posedge clk) begin
-    //     pixels <= rom_data[row];
-    // end
-
-
-// module bram (
-//     input wire clk,
-//     input wire [13:0] addr,
-//     output reg [15:0] data
-// );
-
-//     reg [15:0] mem_array [0:16383]; // Adjust size as needed
-
-//     initial begin
-//         $readmemh("m_hex.mem", mem_array);  // HEX format
-//     end
-
-//     always @(posedge clk) begin
-//         data <= mem_array[addr];
-//     end
-
-// endmodule
-
-
-// 03 03 03 A4 A4 A4 A4 A4 03 03 03 03
-// 03 03 A4 A4 A4 A4 A4 A4 A4 A4 03 03
-// 03 03 48 48 48 AC AC 48 AC 03 03 03
-// 03 48 AC 48 AC AC AC 48 AC AC AC 03
-// 03 48 AC 48 48 AC AC AC 48 AC AC AC
-// 03 48 48 AC AC AC AC 48 48 48 48 03
-// 03 03 03 AC AC AC AC AC AC AC 03 03
-// 03 03 48 48 A4 48 48 48 03 03 03 03
-// 03 48 48 48 A4 48 48 A4 48 48 48 03
-// 48 48 48 48 A4 A4 A4 A4 48 48 48 48
-// AC AC 48 A4 AC A4 A4 AC A4 48 AC AC
-// AC AC AC A4 A4 A4 A4 A4 A4 AC AC AC
-// AC AC A4 A4 A4 A4 A4 A4 A4 A4 AC AC
-// 03 03 A4 A4 A4 03 03 A4 A4 A4 03 03
-// 03 48 48 48 03 03 03 03 48 48 48 03
-// 48 48 48 48 03 03 03 03 48 48 48 48
