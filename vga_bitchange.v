@@ -177,9 +177,9 @@ module vga_bitchange(
 
     // Platform initialization (inside an `initial` block)
     initial begin
-        platform_x[0] = 350; platform_y[0] = 400;
-        platform_x[1] = 250; platform_y[1] = 300;
-        platform_x[2] = 500; platform_y[2] = 400;
+        platform_x[0] = 250; platform_y[0] = 400;
+        platform_x[1] = 325; platform_y[1] = 350;
+        platform_x[2] = 350; platform_y[2] = 400;
     end
 
     wire [1:0] isPlatform1 = hCount >= platform_x[0] && hCount < platform_x[0] + TILE_SIZE &&
@@ -191,7 +191,7 @@ module vga_bitchange(
 
     wire isPlatformPixel = isPlatform1 || isPlatform2 || isPlatform3;
 
-
+    // necessary functions
     function isPlayerInPlatform;
         input [9:0] x;
         input [9:0] y;
@@ -206,11 +206,6 @@ module vga_bitchange(
                     isPlayerInPlatform = 1;
         end
     endfunction
-
-
-
-
-
 
     function isHeadbuttingPlatform;
         input [9:0] x;
@@ -233,12 +228,6 @@ module vga_bitchange(
         end
     endfunction
 
-
-
-
-
-
-
     function isStandingOnPlatform;
         input [9:0] x;
         input [9:0] y;
@@ -249,19 +238,14 @@ module vga_bitchange(
                 if (
                     x + CHAR_WIDTH > platform_x[i] &&
                     x < platform_x[i] + TILE_SIZE &&
-                    y + CHAR_HEIGHT == platform_y[i]
+                    y + CHAR_HEIGHT >= platform_y[i] &&
+                    y + CHAR_HEIGHT <= platform_y[i] + 2 // Add tolerance
                 ) begin
                     isStandingOnPlatform = 1;
                 end
             end
         end
     endfunction
-
-
-
-
-
-
 
 
     function [1:0] getStandingPlatformIndex;
@@ -415,6 +399,19 @@ module vga_bitchange(
                     end 
                     // LANDING - if Mario hits ground or lands on platform
                     else if (V > 0 && (posY + CHAR_HEIGHT >= GROUND_Y || isStandingOnPlatform(posX, posY))) begin
+                        if (V > 0) begin
+                            if (posY + CHAR_HEIGHT >= GROUND_Y) begin
+                                posY <= GROUND_Y;
+                                isJumping <= 0;
+                                V <= 0;
+                            end
+                            else if (isStandingOnPlatform(posX, posY)) begin
+                                posY <= platform_y[getStandingPlatformIndex(posX, posY)] - CHAR_HEIGHT;
+                                isJumping <= 0;
+                                V <= 0;
+                            end
+                        end
+                         
                         isJumping <= 0;
                         V <= 0;
 
@@ -437,6 +434,15 @@ module vga_bitchange(
             else if (btn_jump && (posY + CHAR_HEIGHT >= GROUND_Y || isStandingOnPlatform(posX, posY))) begin
                 isJumping <= 1;
                 V <= -V_INIT; // Start going up
+            end
+
+            // Begin falling if Mario walks off a platform or the ground
+            if (!isJumping && 
+                !(posY + CHAR_HEIGHT >= GROUND_Y) &&
+                !isStandingOnPlatform(posX, posY)) begin
+
+                isJumping <= 1;
+                V <= 1; // Start falling slowly
             end
 
 
