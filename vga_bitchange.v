@@ -33,53 +33,59 @@ module vga_bitchange(
     input btn_jump,
     input [9:0] hCount, vCount,
     output reg [11:0] rgb,
-	output reg [15:0] score
+	output reg [15:0] plat_num
 );
 
+//----------------------------------------------PARAMETERS----------------------------------------------
+
+
+    // SCREEN PARAMETERS
     parameter BLACK = 12'b0000_0000_0000;
     parameter WHITE = 12'b1111_1111_1111;
     parameter RED   = 12'b1111_0000_0000;
     parameter GREEN = 12'b0000_1111_0000;
-    // parameter BLUE = 12'b0001_0001_0101;
     parameter BLUE = 12'h7AF;
+
+    parameter SCREEN_LEFT  = 10'd143;
+    parameter SCREEN_RIGHT = 10'd734;
 
     parameter TRANSPARENT_COLOR = 12'h000;
 
+    // CHARACTER PARAMETERS
     // Character size
     parameter CHAR_WIDTH = 10'd32;
     parameter CHAR_HEIGHT = 10'd32;
 
-    parameter SCREEN_LEFT  = 10'd143;
-    parameter SCREEN_RIGHT = 10'd734 - CHAR_WIDTH;
-    
-    // Character position
-    reg signed [9:0] posX = 10'd300;
-    reg signed [9:0] posY = 10'd400;
-    // reg signed [9:0] old_posX = 10'd300;
-    reg signed [6:0] V = 0;
-    reg isJumping = 0;
-
     // Gravity and jump velocity
     parameter G = 1;
     parameter V_INIT = 7'd15;
-    
-    wire [9:0] GROUND_Y = 10'd460;
+
+    // GROUND PARAMETERS
+    parameter GROUND_Y = 10'd460; // y-coord of the top of the ground section
+
+    // PLATFORM PARAMETERS
+    parameter NUM_PLATFORMS = 4;
+    parameter TILE_SIZE = 24; // adjust to match your sprite's tile size
+
+    // COIN PARAMETERS
+    parameter NUM_COINS = 4;
+    parameter COIN_SIZE = 16;
+
+
+//------------------------------------------------VARIABLES----------------------------------------------
+
+    // CHARACTER VARIABLES
+    // Character position
+    reg signed [9:0] posX = 10'd300;
+    reg signed [9:0] posY = 10'd400;
+    reg signed [6:0] V = 0;
+    reg isJumping = 0;
 
     reg[49:0] marioSpeed;
     reg[49:0] jumpSpeed;
     reg [49:0] jumpWait;
     reg [49:0] movement_counter; // counts how many pixels Mario has moved since last frame switch
     reg [1:0] walkAnimation; // 0 for walk, 1 for jump
-
-    // reg[49:0] animateSpeed;
-
-    // drawing logic variables
-    wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
-                   ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
-
-    wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
-
-    // mario sprite
 
     // direction flag for jumping when not pressing any other button
     reg [1:0] marioDirection; // 0 for right, 1 for left 
@@ -104,12 +110,40 @@ module vga_bitchange(
     wire [11:0] jump_right_sprite_color;
     wire [11:0] jump_left_sprite_color;
 
-    // instantiate map tiles
-    parameter TILE_SIZE = 24; // adjust to match your sprite's tile size
-    wire [11:0] ground_pixel;
-    wire [9:0] ground_sprite_addr = ((vCount - GROUND_Y) % TILE_SIZE) * TILE_SIZE + (hCount % TILE_SIZE);
 
-    parameter NUM_PLATFORMS = 4;
+    // GROUND VARIABLES
+    wire inGround = (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
+
+    // instantiate map tiles
+    wire [11:0] ground_pixel;
+    // CHANGED
+    wire [9:0] ground_sprite_addr = ((vCount - (GROUND_Y + CHAR_HEIGHT)) % TILE_SIZE) * TILE_SIZE + (hCount % TILE_SIZE);
+
+
+    // PLATFORM VARIABLES
+    // instantiate platform tiles
+    wire [11:0] platform_pixel;
+    reg [9:0] platform_sprite_addr;
+
+
+    // COIN VARIABLES
+    reg [9:0] coin_sprite_addr; // to be calculated right before drawing
+    reg [3:0] touchedCoin; // store which coin Mario collided with
+    
+    // coin animation variables
+    reg [23:0] coin_anim_counter = 0;
+    reg [1:0] coin_frame = 0; // 0 = dark, 1 = mid, 2 = light
+    reg [11:0] coin_pixel_color = TRANSPARENT_COLOR; // hold the coin pixel color
+
+    // hold color hex for each coin frame
+    wire [11:0] dark_coin_pixel;
+    wire [11:0] mid_coin_pixel;
+    wire [11:0] light_coin_pixel;
+
+    // old variables
+    // drawing logic variables
+    wire inBlock = ((hCount >= posX) && (hCount < posX + CHAR_WIDTH)) &&
+                   ((vCount >= posY) && (vCount < posY + CHAR_HEIGHT));
 
 // ----------------------------------------- LOADING SPRITES -----------------------------------------
 
@@ -119,9 +153,31 @@ module vga_bitchange(
         .pixel_data(ground_pixel)
     );
 
-    wire isGroundTile = (vCount >= GROUND_Y && vCount < GROUND_Y + TILE_SIZE);
+    platform_tile platformSprite (
+        .clk(clk),
+        .addr(platform_sprite_addr),
+        .pixel_data(platform_pixel)
+    );
 
-    // instantiate all sprites
+    dark_coin darkCoinSprite (
+        .clk(clk),
+        .addr(coin_sprite_addr),
+        .pixel_data(dark_coin_pixel)
+    );
+
+    mid_coin midCoinSprite (
+        .clk(clk),
+        .addr(coin_sprite_addr),
+        .pixel_data(mid_coin_pixel)
+    );
+
+    light_coin lightCoinSprite (
+        .clk(clk),
+        .addr(coin_sprite_addr),
+        .pixel_data(light_coin_pixel)
+    );
+
+    // instantiate all Mario sprites
     mario_idle_right marioIdleRightSprite(
         .clk(clk),
         .addr(sprite_addr),
@@ -160,36 +216,18 @@ module vga_bitchange(
 
 // ------------------------------------------PLATFORMS-----------------------------------------------
 
-    // LOADING PLATFORM SPRITES
-    // reg isPlatformPixel;
-    reg [11:0] selected_platform_pixel;
-    reg [9:0] platform_sprite_addr;
-
-    platform_tile platformSprite (
-        .clk(clk),
-        .addr(platform_sprite_addr),
-        .pixel_data(platform_pixel)
-    );
-
-    reg [9:0] platform_x[0:NUM_PLATFORMS-1];
+    // LOADING PLATFORM LOCATIONS
+    reg [9:0] platform_x_start[0:NUM_PLATFORMS-1];
+    reg [9:0] platform_x_end[0:NUM_PLATFORMS-1];
     reg [9:0] platform_y[0:NUM_PLATFORMS-1];
 
     // Platform initialization (inside an `initial` block)
     initial begin
-        platform_x[0] = 500; platform_y[0] = 400;
-        platform_x[1] = 250; platform_y[1] = 350;
-        platform_x[2] = 600; platform_y[2] = 400;
-        platform_x[3] = 450; platform_y[3] = 350;
+        platform_x_start[0] = 500; platform_x_end[0] = 540; platform_y[0] = 400;
+        platform_x_start[1] = 250; platform_x_end[1] = 280; platform_y[1] = 500;
+        platform_x_start[2] = 600; platform_x_end[2] = 640; platform_y[2] = 400;
+        platform_x_start[3] = 378; platform_x_end[3] = 450; platform_y[3] = 350;
     end
-
-    wire [1:0] isPlatform1 = hCount >= platform_x[0] && hCount < platform_x[0] + TILE_SIZE &&
-            vCount >= platform_y[0] && vCount < platform_y[0] + TILE_SIZE;
-    wire [1:0] isPlatform2 = hCount >= platform_x[1] && hCount < platform_x[1] + TILE_SIZE &&
-                vCount >= platform_y[1] && vCount < platform_y[1] + TILE_SIZE;
-    wire [1:0] isPlatform3 = hCount >= platform_x[2] && hCount < platform_x[2] + TILE_SIZE &&
-                vCount >= platform_y[2] && vCount < platform_y[2] + TILE_SIZE;
-
-    // wire isPlatformPixel;
 
     // necessary functions
     function isPlayerInPlatform;
@@ -199,13 +237,14 @@ module vga_bitchange(
         begin
             isPlayerInPlatform = 0;
             for (i = 0; i < NUM_PLATFORMS; i = i + 1)
-                if (x + CHAR_WIDTH > platform_x[i] &&
-                    x < platform_x[i] + TILE_SIZE &&
+                if (((x + CHAR_WIDTH > platform_x_start[i] && x + CHAR_WIDTH < platform_x_end[i]) ||
+                    (x > platform_x_start[i] && x < platform_x_end[i])) &&
                     y + CHAR_HEIGHT > platform_y[i] &&
                     y < platform_y[i] + TILE_SIZE)
                     isPlayerInPlatform = 1;
         end
     endfunction
+
 
     function isHeadbuttingPlatform;
         input [9:0] x;
@@ -215,9 +254,9 @@ module vga_bitchange(
             isHeadbuttingPlatform = 0;
             for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
                 if (
-                    // Horizontal overlap
-                    x + CHAR_WIDTH > platform_x[i] &&
-                    x < platform_x[i] + TILE_SIZE &&
+                    // Horizontal: either side of Mario is within the platform bounds
+                    ((x + CHAR_WIDTH > platform_x_start[i] && x + CHAR_WIDTH < platform_x_end[i]) ||
+                    (x > platform_x_start[i] && x < platform_x_end[i])) &&
                     // Vertical: Mario's top touching platform's bottom
                     y <= platform_y[i] + TILE_SIZE &&
                     y > platform_y[i]
@@ -228,6 +267,7 @@ module vga_bitchange(
         end
     endfunction
 
+
     function isStandingOnPlatform;
         input [9:0] x;
         input [9:0] y;
@@ -235,9 +275,8 @@ module vga_bitchange(
         begin
             isStandingOnPlatform = 0;
             for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
-                if (
-                    x + CHAR_WIDTH > platform_x[i] &&
-                    x < platform_x[i] + TILE_SIZE &&
+                if (((x + CHAR_WIDTH > platform_x_start[i] && x + CHAR_WIDTH < platform_x_end[i]) ||
+                    (x > platform_x_start[i] && x < platform_x_end[i])) &&
                     y + CHAR_HEIGHT >= platform_y[i] &&
                     y + CHAR_HEIGHT <= platform_y[i] + 10 // Add tolerance
                 ) begin
@@ -255,9 +294,8 @@ module vga_bitchange(
         begin
             getStandingPlatformIndex = 0;
             for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
-                if (
-                    x + CHAR_WIDTH > platform_x[i] &&
-                    x < platform_x[i] + TILE_SIZE &&
+                if (((x + CHAR_WIDTH > platform_x_start[i] && x + CHAR_WIDTH < platform_x_end[i]) ||
+                    (x > platform_x_start[i] && x < platform_x_end[i])) &&
                     y + CHAR_HEIGHT <= platform_y[i] + 10 // add tolerance
                 ) begin
                     getStandingPlatformIndex = i;
@@ -266,55 +304,67 @@ module vga_bitchange(
         end
     endfunction
 
+// ------------------------------------------------COINS-------------------------------------------------
+    // LOADING COIN LOCATIONS
+    reg [9:0] coin_x[0:NUM_COINS-1];
+    reg [9:0] coin_y[0:NUM_COINS-1];
 
-    // Handle platform sprite logic
-    // integer i;
-    // reg match_found;
-    // always @(*) begin
-    //     match_found = 0;
-    //     platform_sprite_addr = 0;
+    // CHECKING COIN VISIBILITY
+    reg coin_collected[0:NUM_COINS-1];
 
-    //     for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
-    //         if (!match_found &&
-    //             hCount >= platform_x[i] && hCount < platform_x[i] + TILE_SIZE &&
-    //             vCount >= platform_y[i] && vCount < platform_y[i] + TILE_SIZE) begin
 
-    //             platform_sprite_addr = (vCount - platform_y[i]) * TILE_SIZE + (hCount - platform_x[i]);
-    //             match_found = 1;
-    //         end
-    //     end
-    // end
+    // coin initialization (inside an `initial` block)
+    initial begin
+        coin_x[0] = 400; coin_y[0] = GROUND_Y - COIN_SIZE;
+        coin_x[1] = 250; coin_y[1] = 500;
+        coin_x[2] = 600; coin_y[2] = 400 - COIN_SIZE;
+        coin_x[3] = 378; coin_y[3] = 350 - COIN_SIZE;
 
-    // always @(*) begin
-    //     match_found = 0;
-    //     selected_platform_pixel = 12'hF00; // fallback color
-    //     platform_sprite_addr = 0;
+        // All coins are initially visible (not collected)
+        coin_collected[0] = 0;
+        coin_collected[1] = 0;
+        coin_collected[2] = 0;
+        coin_collected[3] = 0;
+    end
 
-    //     for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
-    //         if (!match_found &&
-    //             hCount >= platform_x[i] && hCount < platform_x[i] + TILE_SIZE &&
-    //             vCount >= platform_y[i] && vCount < platform_y[i] + TILE_SIZE) begin
-                
-    //             platform_sprite_addr = (vCount - platform_y[i]) * TILE_SIZE + (hCount - platform_x[i]);
-    //             selected_platform_pixel = platform_pixel;
-    //             match_found = 1;
-    //         end
-    //     end
-    // end
+    // check if Mario is colliding with a coin and return which coin was touched
+    function [3:0] getTouchedCoinIndex;
+        input [9:0] x;
+        input [9:0] y;
+        integer i;
+        begin
+            getTouchedCoinIndex = 4'd15; // Invalid index, means no coin touched
+            for (i = 0; i < NUM_COINS; i = i + 1) begin
+                if (!coin_collected[i] &&
+                    ((x + CHAR_WIDTH > coin_x[i]) && (x < coin_x[i] + COIN_SIZE)) &&
+                    ((y + CHAR_HEIGHT > coin_y[i]) && (y < coin_y[i] + COIN_SIZE))) begin
+                    getTouchedCoinIndex = i;
+                end
+            end
+        end
+    endfunction
 
-    // reg [11:0] platform_pixel_d;
-    // reg [11:0] platform_sprite_addr_d;
-    // reg [9:0] delayed_hCount, delayed_vCount;
-    // reg isPlatformPixel_d;
+    // coin collision logic
+    integer k;
+    always @(posedge clk) begin
+        touchedCoin = getTouchedCoinIndex(posX, posY);
+        for (k = 0; k < NUM_COINS; k = k + 1) begin
+            if (k == touchedCoin)
+                coin_collected[k] <= 1;
+        end
+    end
 
-    // always @(posedge clk) begin
-    //     platform_sprite_addr_d <= platform_sprite_addr; // delay addr
-    //     platform_pixel_d <= platform_pixel;             // capture ROM output
-    //     delayed_hCount <= hCount;                       // delay pixel coord
-    //     delayed_vCount <= vCount;
-    // end
-
-    // assign isPlatformPixel = match_found;
+    // handle coin animation logic
+    always @(posedge clk) begin
+        coin_anim_counter = coin_anim_counter + 1;
+        
+        if (coin_anim_counter >= 24'd5000000) begin // adjust for speed
+            coin_anim_counter = 0;
+            coin_frame = coin_frame + 1;
+            if (coin_frame > 2)
+                coin_frame = 0;
+        end
+    end
 
 // ----------------------------------------- CHARACTER MOVEMENT -----------------------------------------
     always @(posedge clk or posedge rst) begin
@@ -323,8 +373,17 @@ module vga_bitchange(
             posY <= GROUND_Y;
             isJumping <= 0;
             V <= 0;
+
+            // reset coin visibility
+            coin_collected[0] = 0;
+            coin_collected[1] = 0;
+            coin_collected[2] = 0;
+            coin_collected[3] = 0;
     
         end else begin
+
+            // for testing platforms
+            plat_num <= getStandingPlatformIndex(posX, posY);
 
             // load default sprite if nothing's happening
             if (!btn_left && !btn_right && !isJumping) begin
@@ -342,26 +401,32 @@ module vga_bitchange(
                 // set the direction flag
                 marioDirection = 1'b1;
 
+                // limit the movement propagation or else Mario turns into The Flash
                 marioSpeed = marioSpeed + 50'd1;
                     if (marioSpeed >= 50'd500000) //500 thousand
                     begin
+                        // restrict Mario's movement if about to go off screen or into a platform
                         if (posX > SCREEN_LEFT && !isPlayerInPlatform(posX-10'd1, posY))
                             posX <= posX - 10'd1;
+
+                        // reset counter
                         marioSpeed = 50'd0;
+
+                        // increase counter for animations
                         movement_counter = movement_counter + 50'd1;
                     end
 
-                // set flag for animating sprite
+                // set flag for animating sprite based on number of times Mario's position updated
                 if (movement_counter >= 50'd15)
                 begin 
                     if (!walkAnimation)
                     begin
-                        walkAnimation = 1'd1;
+                        walkAnimation = 1'd1; // jump sprite
                     end
                     
                     else
                     begin
-                        walkAnimation = 1'd0;
+                        walkAnimation = 1'd0; // walk sprite
                     end
                     movement_counter = 50'd0;
                 end
@@ -375,7 +440,7 @@ module vga_bitchange(
                 marioSpeed = marioSpeed + 50'd1;
                 if (marioSpeed >= 50'd500000) //500 thousand
                     begin
-                         if (posX < SCREEN_RIGHT && !isPlayerInPlatform(posX+10'd1, posY))
+                         if (posX + CHAR_WIDTH < SCREEN_RIGHT && !isPlayerInPlatform(posX+10'd1, posY))
                            posX <= posX + 10'd1;
                         marioSpeed = 50'd0;
                         movement_counter = movement_counter + 50'd1;
@@ -406,40 +471,54 @@ module vga_bitchange(
                 // Animate Mario in air
                 sprite_pixel_color = marioDirection ? jump_left_sprite_color : jump_right_sprite_color;
 
+                // limit how often Mario jumps if jump button is continuously pressed
                 if (jumpSpeed >= 50'd1000000) begin
                     jumpSpeed <= 0;
 
                     // HEADBUTT - if Mario hits the bottom of a platform
                     if (V < 0 && isHeadbuttingPlatform(posX, posY)) begin
                         V <= 0;
-
                     end 
+
                     // LANDING - if Mario hits ground or lands on platform
                     else if (V > 0 && (posY + CHAR_HEIGHT >= GROUND_Y || isStandingOnPlatform(posX, posY))) begin
-                        if (V > 0) begin
-                            if (posY + CHAR_HEIGHT >= GROUND_Y) begin
-                                posY <= GROUND_Y;
-                                isJumping <= 0;
-                                V <= 0;
-                            end
-                            else if (isStandingOnPlatform(posX, posY)) begin
-                                posY <= platform_y[getStandingPlatformIndex(posX, posY)] - CHAR_HEIGHT;
-                                isJumping <= 0;
-                                V <= 0;
-                            end
+                        // if landing on the ground
+                        if (posY + CHAR_HEIGHT >= GROUND_Y) begin
+                            posY <= GROUND_Y;
+                            isJumping <= 0;
+                            V <= 0;
                         end
+
+                        // if landing on a platform
+                        else if (isStandingOnPlatform(posX, posY)) begin
+                            posY <= platform_y[getStandingPlatformIndex(posX, posY)] - CHAR_HEIGHT;
+
+                            // for testing platforms
+                            plat_num <= getStandingPlatformIndex(posX, posY);
+
+                            isJumping <= 0;
+                            V <= 0;
+                        end
+
                          
                         isJumping <= 0;
                         V <= 0;
 
+                        // if Mario is on the floor, keep him there
                         if (posY + CHAR_HEIGHT >= GROUND_Y) begin
                             posY <= GROUND_Y;
                         end 
+
+                        // if Mario is on a platform, keep him there
                         else if (isStandingOnPlatform(posX, posY)) begin
                             posY <= platform_y[getStandingPlatformIndex(posX, posY)] - CHAR_HEIGHT;
+                            
+                            // for testing platforms
+                            plat_num <= getStandingPlatformIndex(posX, posY);
                         end
 
                     end 
+
                     // Still in the air — apply gravity
                     else begin
                         V <= V + G;
@@ -447,6 +526,7 @@ module vga_bitchange(
                     end
                 end
             end 
+
             // Starting a jump if jump button is pressed and Mario is on ground or platform
             else if (btn_jump && (posY + CHAR_HEIGHT >= GROUND_Y || isStandingOnPlatform(posX, posY))) begin
                 isJumping <= 1;
@@ -481,37 +561,36 @@ module vga_bitchange(
     end
 
 
-
-// ------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------VGA DISPLAY CONTROL--------------------------------------------
 
     // Pipeline registers
     reg [11:0] rgb_next;
-    // reg [11:0] rgb_reg;
 
     reg isMarioPixel_d;
     reg inGround_d;
-    // reg inPlatform_d;
-    // reg [11:0] selected_platform_pixel_d;
     reg bright_d;
 
-    reg [9:0] platform_sprite_addr;
     reg isPlatformPixel;
     reg isPlatformPixel_d;
-    reg [11:0] platform_pixel_d;
 
+    reg isCoinPixel = 0;
+    reg isCoinPixel_d;
+
+    // logic to get the pixel addresses of all the platforms
     integer j;
-    always @(*) begin
+    always @(posedge clk) begin
         isPlatformPixel = 0;
         platform_sprite_addr = 0;
 
         for (j = 0; j < NUM_PLATFORMS; j = j + 1) begin
-            if (hCount >= platform_x[j] && hCount < platform_x[j] + TILE_SIZE &&
+            if (hCount >= platform_x_start[j] && hCount < platform_x_end[j] &&
                 vCount >= platform_y[j] && vCount < platform_y[j] + TILE_SIZE) begin
                 isPlatformPixel = 1;
-                platform_sprite_addr = (vCount - platform_y[j]) * TILE_SIZE + (hCount - platform_x[j]);
+                platform_sprite_addr = ((vCount - platform_y[j]) % TILE_SIZE) * TILE_SIZE + (hCount - platform_x_start[j]) % TILE_SIZE;
             end
         end
     end
+
 
     // Delay signals by 1 clock cycle
     always @(posedge clk) begin
@@ -520,17 +599,19 @@ module vga_bitchange(
                         vCount >= posY && vCount < posY + CHAR_HEIGHT &&
                         sprite_pixel_color != TRANSPARENT_COLOR);
 
-        // selected_platform_pixel_d <= selected_platform_pixel;
-        // inPlatform_d <= (isPlatformPixel_d && selected_platform_pixel != TRANSPARENT_COLOR);
-
         isPlatformPixel_d <= isPlatformPixel;
-        platform_pixel_d <= platform_pixel; // value returned from ROM
 
         inGround_d <= (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
 
+        isCoinPixel_d <= isCoinPixel;
+
         bright_d <= bright;
 
-        // Convert 8-bit color to 12-bit
+        // draw everything as we scan through the screen
+        // NOTE: how this works is based on which condition the current pixel fulfills
+        // pass the correct pixel to the output
+        // mem-file-reading is happening every clock as well and the sprite modules are outputting one pixel every clock
+        // which we then pass directly to the output if we're currently in the sprite location
         if (!bright_d)
             rgb_next <= BLACK;
         else if (isMarioPixel_d) begin
@@ -539,14 +620,15 @@ module vga_bitchange(
         else if (inGround_d)
             rgb_next <= ground_pixel;
         else if (isPlatformPixel_d)
-            rgb_next = platform_pixel_d;
-        // else if (inPlatform_d)
-        //     rgb_next <= selected_platform_pixel_d;
+            rgb_next <= platform_pixel;
+        else if (isCoinPixel)
+            rgb_next <= coin_pixel_color;
         else
             rgb_next <= BLUE;
 
         // send RGB output
         rgb <= rgb_next;
+
     end
 
 endmodule
