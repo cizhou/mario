@@ -33,7 +33,7 @@ module vga_bitchange(
     input btn_jump,
     input [9:0] hCount, vCount,
     output reg [11:0] rgb,
-	output reg [15:0] plat_num
+	output reg [15:0] score
 );
 
 //----------------------------------------------PARAMETERS----------------------------------------------
@@ -131,7 +131,7 @@ module vga_bitchange(
     reg [3:0] touchedCoin; // store which coin Mario collided with
     
     // coin animation variables
-    reg [23:0] coin_anim_counter = 0;
+    reg [49:0] coin_anim_counter = 0;
     reg [1:0] coin_frame = 0; // 0 = dark, 1 = mid, 2 = light
     reg [11:0] coin_pixel_color = TRANSPARENT_COLOR; // hold the coin pixel color
 
@@ -213,6 +213,12 @@ module vga_bitchange(
         .addr(sprite_addr),
         .pixel_data(jump_right_sprite_color)
     );
+
+
+// ------------------------------------------GAME LOGIC-----------------------------------------------
+    initial begin
+        score = 0;  // Initialize score to 0 at the start
+    end
 
 // ------------------------------------------PLATFORMS-----------------------------------------------
 
@@ -349,8 +355,10 @@ module vga_bitchange(
     always @(posedge clk) begin
         touchedCoin = getTouchedCoinIndex(posX, posY);
         for (k = 0; k < NUM_COINS; k = k + 1) begin
-            if (k == touchedCoin)
+            if (k == touchedCoin) begin
                 coin_collected[k] <= 1;
+                score <= score + 15'b1;
+            end
         end
     end
 
@@ -358,13 +366,40 @@ module vga_bitchange(
     always @(posedge clk) begin
         coin_anim_counter = coin_anim_counter + 1;
         
-        if (coin_anim_counter >= 24'd5000000) begin // adjust for speed
+        if (coin_anim_counter >= 50'd10000000) begin // adjust for speed
             coin_anim_counter = 0;
             coin_frame = coin_frame + 1;
             if (coin_frame > 2)
                 coin_frame = 0;
         end
     end
+
+    // handle coin drawing
+    integer c;
+    always @(posedge clk) begin
+        isCoinPixel = 0;
+        coin_sprite_addr = 0;
+        coin_pixel_color = TRANSPARENT_COLOR;
+
+        for (c = 0; c < NUM_COINS; c = c + 1) begin
+            if (!coin_collected[c] &&
+                hCount >= coin_x[c] && hCount < coin_x[c] + COIN_SIZE &&
+                vCount >= coin_y[c] && vCount < coin_y[c] + COIN_SIZE) begin
+
+                isCoinPixel = 1;
+                coin_sprite_addr = ((vCount - coin_y[c]) % COIN_SIZE) * COIN_SIZE +
+                                (hCount - coin_x[c]) % COIN_SIZE;
+
+                // Pick frame based on animation
+                case (coin_frame)
+                    2'd0: coin_pixel_color = dark_coin_pixel;
+                    2'd1: coin_pixel_color = mid_coin_pixel;
+                    2'd2: coin_pixel_color = light_coin_pixel;
+                endcase
+            end
+        end
+    end
+
 
 // ----------------------------------------- CHARACTER MOVEMENT -----------------------------------------
     always @(posedge clk or posedge rst) begin
@@ -373,6 +408,7 @@ module vga_bitchange(
             posY <= GROUND_Y;
             isJumping <= 0;
             V <= 0;
+            score <= 0;
 
             // reset coin visibility
             coin_collected[0] = 0;
@@ -381,9 +417,6 @@ module vga_bitchange(
             coin_collected[3] = 0;
     
         end else begin
-
-            // for testing platforms
-            plat_num <= getStandingPlatformIndex(posX, posY);
 
             // load default sprite if nothing's happening
             if (!btn_left && !btn_right && !isJumping) begin
@@ -493,9 +526,6 @@ module vga_bitchange(
                         else if (isStandingOnPlatform(posX, posY)) begin
                             posY <= platform_y[getStandingPlatformIndex(posX, posY)] - CHAR_HEIGHT;
 
-                            // for testing platforms
-                            plat_num <= getStandingPlatformIndex(posX, posY);
-
                             isJumping <= 0;
                             V <= 0;
                         end
@@ -512,9 +542,7 @@ module vga_bitchange(
                         // if Mario is on a platform, keep him there
                         else if (isStandingOnPlatform(posX, posY)) begin
                             posY <= platform_y[getStandingPlatformIndex(posX, posY)] - CHAR_HEIGHT;
-                            
-                            // for testing platforms
-                            plat_num <= getStandingPlatformIndex(posX, posY);
+                        
                         end
 
                     end 
@@ -621,7 +649,7 @@ module vga_bitchange(
             rgb_next <= ground_pixel;
         else if (isPlatformPixel_d)
             rgb_next <= platform_pixel;
-        else if (isCoinPixel)
+        else if (isCoinPixel && coin_pixel_color != TRANSPARENT_COLOR)
             rgb_next <= coin_pixel_color;
         else
             rgb_next <= BLUE;
