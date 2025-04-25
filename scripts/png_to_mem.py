@@ -20,8 +20,8 @@ def convert_png_to_mem(png_path, mem_path):
 
 if __name__ == "__main__":
     # Using relative path to reach ../graphics/
-    png_path = os.path.join("..", "graphics", "enemy_1", "32x32_enemy_1.png")
-    mem_path = os.path.join("..", "graphics", "enemy_1", "32x32_enemy_1.mem")
+    png_path = os.path.join("..", "graphics", "coins", "16x16_coin_3.png")
+    mem_path = os.path.join("..", "graphics", "coins", "16x16_coin_3.mem")
 
     if not os.path.exists(png_path):
         print(f"❌ PNG file not found: {png_path}")
