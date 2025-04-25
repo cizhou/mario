@@ -109,6 +109,8 @@ module vga_bitchange(
     wire [11:0] ground_pixel;
     wire [9:0] ground_sprite_addr = ((vCount - GROUND_Y) % TILE_SIZE) * TILE_SIZE + (hCount % TILE_SIZE);
 
+    parameter NUM_PLATFORMS = 4;
+
 // ----------------------------------------- LOADING SPRITES -----------------------------------------
 
     ground_tile groundSprite(
@@ -169,17 +171,15 @@ module vga_bitchange(
         .pixel_data(platform_pixel)
     );
 
-    // Platform definitions
-    parameter NUM_PLATFORMS = 3;
-
     reg [9:0] platform_x[0:NUM_PLATFORMS-1];
     reg [9:0] platform_y[0:NUM_PLATFORMS-1];
 
     // Platform initialization (inside an `initial` block)
     initial begin
-        platform_x[0] = 250; platform_y[0] = 400;
-        platform_x[1] = 325; platform_y[1] = 350;
-        platform_x[2] = 350; platform_y[2] = 400;
+        platform_x[0] = 500; platform_y[0] = 400;
+        platform_x[1] = 250; platform_y[1] = 350;
+        platform_x[2] = 600; platform_y[2] = 400;
+        platform_x[3] = 450; platform_y[3] = 350;
     end
 
     wire [1:0] isPlatform1 = hCount >= platform_x[0] && hCount < platform_x[0] + TILE_SIZE &&
@@ -189,7 +189,7 @@ module vga_bitchange(
     wire [1:0] isPlatform3 = hCount >= platform_x[2] && hCount < platform_x[2] + TILE_SIZE &&
                 vCount >= platform_y[2] && vCount < platform_y[2] + TILE_SIZE;
 
-    wire isPlatformPixel = isPlatform1 || isPlatform2 || isPlatform3;
+    // wire isPlatformPixel;
 
     // necessary functions
     function isPlayerInPlatform;
@@ -239,7 +239,7 @@ module vga_bitchange(
                     x + CHAR_WIDTH > platform_x[i] &&
                     x < platform_x[i] + TILE_SIZE &&
                     y + CHAR_HEIGHT >= platform_y[i] &&
-                    y + CHAR_HEIGHT <= platform_y[i] + 2 // Add tolerance
+                    y + CHAR_HEIGHT <= platform_y[i] + 10 // Add tolerance
                 ) begin
                     isStandingOnPlatform = 1;
                 end
@@ -258,7 +258,7 @@ module vga_bitchange(
                 if (
                     x + CHAR_WIDTH > platform_x[i] &&
                     x < platform_x[i] + TILE_SIZE &&
-                    y + CHAR_HEIGHT == platform_y[i]
+                    y + CHAR_HEIGHT <= platform_y[i] + 10 // add tolerance
                 ) begin
                     getStandingPlatformIndex = i;
                 end
@@ -267,37 +267,54 @@ module vga_bitchange(
     endfunction
 
 
-
-
     // Handle platform sprite logic
-    always @(*) begin
-        
-        selected_platform_pixel = 12'hF00; // fallback color
-        platform_sprite_addr = 0;
+    // integer i;
+    // reg match_found;
+    // always @(*) begin
+    //     match_found = 0;
+    //     platform_sprite_addr = 0;
 
-        // Platform 0
-        if (hCount >= platform_x[0] && hCount < platform_x[0] + TILE_SIZE &&
-            vCount >= platform_y[0] && vCount < platform_y[0] + TILE_SIZE) begin
-            // isPlatformPixel = 1;
-            platform_sprite_addr = (vCount - platform_y[0]) * TILE_SIZE + (hCount - platform_x[0]);
-        end
-        // Platform 1
-        else if (hCount >= platform_x[1] && hCount < platform_x[1] + TILE_SIZE &&
-                vCount >= platform_y[1] && vCount < platform_y[1] + TILE_SIZE) begin
-            // isPlatformPixel = 1;
-            platform_sprite_addr = (vCount - platform_y[1]) * TILE_SIZE + (hCount - platform_x[1]);
-        end
-        // Platform 2
-        else if (hCount >= platform_x[2] && hCount < platform_x[2] + TILE_SIZE &&
-                vCount >= platform_y[2] && vCount < platform_y[2] + TILE_SIZE) begin
-            // isPlatformPixel = 1;
-            platform_sprite_addr = (vCount - platform_y[2]) * TILE_SIZE + (hCount - platform_x[2]);
-        end
+    //     for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
+    //         if (!match_found &&
+    //             hCount >= platform_x[i] && hCount < platform_x[i] + TILE_SIZE &&
+    //             vCount >= platform_y[i] && vCount < platform_y[i] + TILE_SIZE) begin
 
-        // Only grab sprite pixel if we're inside a platform
-        if (isPlatformPixel)
-            selected_platform_pixel = platform_pixel;
-    end
+    //             platform_sprite_addr = (vCount - platform_y[i]) * TILE_SIZE + (hCount - platform_x[i]);
+    //             match_found = 1;
+    //         end
+    //     end
+    // end
+
+    // always @(*) begin
+    //     match_found = 0;
+    //     selected_platform_pixel = 12'hF00; // fallback color
+    //     platform_sprite_addr = 0;
+
+    //     for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
+    //         if (!match_found &&
+    //             hCount >= platform_x[i] && hCount < platform_x[i] + TILE_SIZE &&
+    //             vCount >= platform_y[i] && vCount < platform_y[i] + TILE_SIZE) begin
+                
+    //             platform_sprite_addr = (vCount - platform_y[i]) * TILE_SIZE + (hCount - platform_x[i]);
+    //             selected_platform_pixel = platform_pixel;
+    //             match_found = 1;
+    //         end
+    //     end
+    // end
+
+    // reg [11:0] platform_pixel_d;
+    // reg [11:0] platform_sprite_addr_d;
+    // reg [9:0] delayed_hCount, delayed_vCount;
+    // reg isPlatformPixel_d;
+
+    // always @(posedge clk) begin
+    //     platform_sprite_addr_d <= platform_sprite_addr; // delay addr
+    //     platform_pixel_d <= platform_pixel;             // capture ROM output
+    //     delayed_hCount <= hCount;                       // delay pixel coord
+    //     delayed_vCount <= vCount;
+    // end
+
+    // assign isPlatformPixel = match_found;
 
 // ----------------------------------------- CHARACTER MOVEMENT -----------------------------------------
     always @(posedge clk or posedge rst) begin
@@ -473,11 +490,28 @@ module vga_bitchange(
 
     reg isMarioPixel_d;
     reg inGround_d;
+    // reg inPlatform_d;
+    // reg [11:0] selected_platform_pixel_d;
     reg bright_d;
 
-    wire [2:0] red_8bit;
-    wire [2:0] green_8bit;
-    wire [2:0] blue_8bit;
+    reg [9:0] platform_sprite_addr;
+    reg isPlatformPixel;
+    reg isPlatformPixel_d;
+    reg [11:0] platform_pixel_d;
+
+    integer j;
+    always @(*) begin
+        isPlatformPixel = 0;
+        platform_sprite_addr = 0;
+
+        for (j = 0; j < NUM_PLATFORMS; j = j + 1) begin
+            if (hCount >= platform_x[j] && hCount < platform_x[j] + TILE_SIZE &&
+                vCount >= platform_y[j] && vCount < platform_y[j] + TILE_SIZE) begin
+                isPlatformPixel = 1;
+                platform_sprite_addr = (vCount - platform_y[j]) * TILE_SIZE + (hCount - platform_x[j]);
+            end
+        end
+    end
 
     // Delay signals by 1 clock cycle
     always @(posedge clk) begin
@@ -486,7 +520,14 @@ module vga_bitchange(
                         vCount >= posY && vCount < posY + CHAR_HEIGHT &&
                         sprite_pixel_color != TRANSPARENT_COLOR);
 
+        // selected_platform_pixel_d <= selected_platform_pixel;
+        // inPlatform_d <= (isPlatformPixel_d && selected_platform_pixel != TRANSPARENT_COLOR);
+
+        isPlatformPixel_d <= isPlatformPixel;
+        platform_pixel_d <= platform_pixel; // value returned from ROM
+
         inGround_d <= (vCount >= GROUND_Y + CHAR_HEIGHT) && (vCount <= 516);
+
         bright_d <= bright;
 
         // Convert 8-bit color to 12-bit
@@ -497,8 +538,10 @@ module vga_bitchange(
         end
         else if (inGround_d)
             rgb_next <= ground_pixel;
-        else if (isPlatformPixel)
-            rgb_next <= selected_platform_pixel;
+        else if (isPlatformPixel_d)
+            rgb_next = platform_pixel_d;
+        // else if (inPlatform_d)
+        //     rgb_next <= selected_platform_pixel_d;
         else
             rgb_next <= BLUE;
 
