@@ -8,14 +8,14 @@
 module ground_tile (
     input wire clk,
     input wire [9:0] addr,        // 10-bit address: 2^10 = 1024
-    output reg [11:0] pixel_data   // 8-bit RGB (3-3-2)
+    output reg [11:0] pixel_data   // 12-bit RGB
 );
 
     // 24x24 = 576 pixels
-    reg [11:0] rom [0:576];        // 1024 total pixels
+    reg [11:0] rom [0:575];        // 1024 total pixels
 
     initial begin
-        $readmemh("C:/Mario/graphics/tiles/24x24_ground.mem", rom);
+        $readmemh("./tiles/24x24_ground.mem", rom);
     end
 
     always @(posedge clk) begin
@@ -27,19 +27,48 @@ endmodule
 
 module platform_tile (
     input wire clk,
-    input wire [9:0] addr,        // 10-bit address: 2^10 = 1024
-    output reg [11:0] pixel_data   // 8-bit RGB (3-3-2)
+    input wire [9:0] addr,
+    output reg [11:0] pixel_data
 );
+    reg [11:0] rom [0:575];
+    initial $readmemh("./tiles/24x24_platform.mem", rom);
 
-    // 24x24 = 576 pixels
-    reg [11:0] rom [0:576];        // 1024 total pixels
-
-    initial begin
-        $readmemh("C:/Mario/graphics/tiles/24x24_platform.mem", rom);
-    end
-
-    always @(posedge clk) begin
+    always @(posedge clk)
         pixel_data <= rom[addr];
-    end
+endmodule
 
+module dark_coin (
+    input wire clk,
+    input wire [9:0] addr,
+    output reg [11:0] pixel_data
+);
+    reg [11:0] rom [0:575];
+    initial $readmemh("./objects/16x16_coin_1.mem", rom);
+
+    always @(posedge clk)
+        pixel_data <= rom[addr];
+endmodule
+
+module mid_coin (
+    input wire clk,
+    input wire [9:0] addr,
+    output reg [11:0] pixel_data
+);
+    reg [11:0] rom [0:575];
+    initial $readmemh("./objects/16x16_coin_2.mem", rom);
+
+    always @(posedge clk)
+        pixel_data <= rom[addr];
+endmodule
+
+module light_coin (
+    input wire clk,
+    input wire [9:0] addr,
+    output reg [11:0] pixel_data
+);
+    reg [11:0] rom [0:575];
+    initial $readmemh("./objects/16x16_coin_3.mem", rom);
+
+    always @(posedge clk)
+        pixel_data <= rom[addr];
 endmodule
