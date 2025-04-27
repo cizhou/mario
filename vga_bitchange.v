@@ -32,6 +32,7 @@ module vga_bitchange(
     input btn_right,
     input btn_jump,
     input [9:0] hCount, vCount,
+    input [9:0] coin_num,
     output reg [11:0] rgb,
 	output reg [15:0] score
 );
@@ -129,6 +130,7 @@ module vga_bitchange(
     // COIN VARIABLES
     reg [9:0] coin_sprite_addr; // to be calculated right before drawing
     reg [3:0] touchedCoin; // store which coin Mario collided with
+    reg [3:0] touchedCoin_d;  // delayed version for next clock
     
     // coin animation variables
     reg [49:0] coin_anim_counter = 0;
@@ -230,7 +232,7 @@ module vga_bitchange(
     // Platform initialization (inside an `initial` block)
     initial begin
         platform_x_start[0] = 500; platform_x_end[0] = 540; platform_y[0] = 400;
-        platform_x_start[1] = 250; platform_x_end[1] = 280; platform_y[1] = 500;
+        platform_x_start[1] = 250; platform_x_end[1] = 280; platform_y[1] = 300;
         platform_x_start[2] = 600; platform_x_end[2] = 640; platform_y[2] = 400;
         platform_x_start[3] = 378; platform_x_end[3] = 450; platform_y[3] = 350;
     end
@@ -293,7 +295,7 @@ module vga_bitchange(
     endfunction
 
 
-    function [1:0] getStandingPlatformIndex;
+    function [3:0] getStandingPlatformIndex;
         input [9:0] x;
         input [9:0] y;
         integer i;
@@ -316,21 +318,25 @@ module vga_bitchange(
     reg [9:0] coin_y[0:NUM_COINS-1];
 
     // CHECKING COIN VISIBILITY
-    reg coin_collected[0:NUM_COINS-1];
+    reg coin_collected[0:NUM_COINS-1]; // Only 1 bit per coin
+
 
 
     // coin initialization (inside an `initial` block)
     initial begin
-        coin_x[0] = 400; coin_y[0] = GROUND_Y - COIN_SIZE;
-        coin_x[1] = 250; coin_y[1] = 500;
+        coin_x[0] = 300; coin_y[0] = 400;
+        coin_x[1] = 250; coin_y[1] = 300 - COIN_SIZE;
         coin_x[2] = 600; coin_y[2] = 400 - COIN_SIZE;
         coin_x[3] = 378; coin_y[3] = 350 - COIN_SIZE;
 
         // All coins are initially visible (not collected)
-        coin_collected[0] = 0;
+        coin_collected[0] = 1;
         coin_collected[1] = 0;
         coin_collected[2] = 0;
         coin_collected[3] = 0;
+
+        // turn of the one from the switch 
+        coin_collected[coin_num] = 1;
     end
 
     // check if Mario is colliding with a coin and return which coin was touched
@@ -342,25 +348,36 @@ module vga_bitchange(
             getTouchedCoinIndex = 4'd15; // Invalid index, means no coin touched
             for (i = 0; i < NUM_COINS; i = i + 1) begin
                 if (!coin_collected[i] &&
-                    ((x + CHAR_WIDTH > coin_x[i]) && (x < coin_x[i] + COIN_SIZE)) &&
-                    ((y + CHAR_HEIGHT > coin_y[i]) && (y < coin_y[i] + COIN_SIZE))) begin
-                    getTouchedCoinIndex = i;
+                    // check if any side of Mario is within coin bounds
+                    ((x + CHAR_WIDTH > coin_x[i] && x + CHAR_WIDTH < coin_x[i] + COIN_SIZE) ||
+                    (x > coin_x[i] && x < coin_x[i] + COIN_SIZE)) ||
+                    ((y + CHAR_HEIGHT > coin_y[i] && y + CHAR_HEIGHT < coin_y[i] + COIN_SIZE) ||
+                    (y > coin_y[i] && y < coin_y[i] + COIN_SIZE)))
+                begin
+                    getTouchedCoinIndex = 0;
                 end
             end
+
+            //TESTING
+            getTouchedCoinIndex = 0;
         end
     endfunction
 
     // coin collision logic
-    integer k;
-    always @(posedge clk) begin
-        touchedCoin = getTouchedCoinIndex(posX, posY);
-        for (k = 0; k < NUM_COINS; k = k + 1) begin
-            if (k == touchedCoin) begin
-                coin_collected[k] <= 1;
-                score <= score + 15'b1;
-            end
-        end
-    end
+
+
+    // always @(posedge clk) begin
+    //     touchedCoin <= getTouchedCoinIndex(posX, posY);
+    //     score <= touchedCoin;
+
+
+    //     if (touchedCoin != 4'd15 && !coin_collected[touchedCoin]) begin
+    //         coin_collected[touchedCoin] <= 1;
+    //         score <= score + 1;
+    //     end
+
+    // end
+
 
     // handle coin animation logic
     always @(posedge clk) begin
@@ -374,34 +391,21 @@ module vga_bitchange(
         end
     end
 
-    // handle coin drawing
-    integer c;
+    // score and mark the coin as collected
     always @(posedge clk) begin
-        isCoinPixel = 0;
-        coin_sprite_addr = 0;
-        coin_pixel_color = TRANSPARENT_COLOR;
+        touchedCoin <= getTouchedCoinIndex(posX, posY);
+        // score <= touchedCoin;
 
-        for (c = 0; c < NUM_COINS; c = c + 1) begin
-            if (!coin_collected[c] &&
-                hCount >= coin_x[c] && hCount < coin_x[c] + COIN_SIZE &&
-                vCount >= coin_y[c] && vCount < coin_y[c] + COIN_SIZE) begin
-
-                isCoinPixel = 1;
-                coin_sprite_addr = ((vCount - coin_y[c]) % COIN_SIZE) * COIN_SIZE +
-                                (hCount - coin_x[c]) % COIN_SIZE;
-
-                // Pick frame based on animation
-                case (coin_frame)
-                    2'd0: coin_pixel_color = dark_coin_pixel;
-                    2'd1: coin_pixel_color = mid_coin_pixel;
-                    2'd2: coin_pixel_color = light_coin_pixel;
-                endcase
-            end
+        if (touchedCoin != 4'd15 && !coin_collected[touchedCoin]) begin
+            coin_collected[touchedCoin] <= 1;
+            score <= score + 1;
         end
+
     end
 
 
 // ----------------------------------------- CHARACTER MOVEMENT -----------------------------------------
+    integer i;
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             posX <= 10'd300;
@@ -411,10 +415,17 @@ module vga_bitchange(
             score <= 0;
 
             // reset coin visibility
-            coin_collected[0] = 0;
-            coin_collected[1] = 0;
-            coin_collected[2] = 0;
-            coin_collected[3] = 0;
+            coin_collected[0] <= 0;
+            coin_collected[1] <= 0;
+            coin_collected[2] <= 0;
+            coin_collected[3] <= 0;
+            // for (i = 0; i < NUM_COINS; i = i + 1)
+            //     coin_collected[i] <= 0;
+
+            // if (coin_num < NUM_COINS)
+            //     coin_collected[coin_num] <= 1;
+
+
     
         end else begin
 
@@ -586,8 +597,15 @@ module vga_bitchange(
                 sprite_pixel_color = jump_right_sprite_color;
             end
         end
-    end
 
+        // score and mark the coin as collected
+        // touchedCoin <= getTouchedCoinIndex(posX, posY);
+        // if (touchedCoin != 4'd15 && !coin_collected[touchedCoin]) begin
+        //     coin_collected[touchedCoin] <= 1;
+        //     score <= score + 1;
+        // end
+
+    end
 
 // -------------------------------------------VGA DISPLAY CONTROL--------------------------------------------
 
@@ -615,6 +633,32 @@ module vga_bitchange(
                 vCount >= platform_y[j] && vCount < platform_y[j] + TILE_SIZE) begin
                 isPlatformPixel = 1;
                 platform_sprite_addr = ((vCount - platform_y[j]) % TILE_SIZE) * TILE_SIZE + (hCount - platform_x_start[j]) % TILE_SIZE;
+            end
+        end
+    end
+
+    // handle coin drawing
+    integer c;
+    always @(posedge clk) begin
+        isCoinPixel = 0;
+        coin_sprite_addr = 0;
+        coin_pixel_color = TRANSPARENT_COLOR;
+
+        for (c = 0; c < NUM_COINS; c = c + 1) begin
+            if (!coin_collected[c] &&
+                hCount >= coin_x[c] && hCount < coin_x[c] + COIN_SIZE &&
+                vCount >= coin_y[c] && vCount < coin_y[c] + COIN_SIZE) begin
+
+                isCoinPixel = 1;
+                coin_sprite_addr = ((vCount - coin_y[c]) % COIN_SIZE) * COIN_SIZE +
+                                (hCount - coin_x[c]) % COIN_SIZE;
+
+                // Pick frame based on animation
+                case (coin_frame)
+                    2'd0: coin_pixel_color = dark_coin_pixel;
+                    2'd1: coin_pixel_color = mid_coin_pixel;
+                    2'd2: coin_pixel_color = light_coin_pixel;
+                endcase
             end
         end
     end
