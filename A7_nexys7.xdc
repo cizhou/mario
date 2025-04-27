@@ -5,6 +5,54 @@ set_property PACKAGE_PIN E3 [get_ports ClkPort]
 	set_property IOSTANDARD LVCMOS33 [get_ports ClkPort]
 	create_clock -add -name ClkPort -period 10.00 [get_ports ClkPort]
 
+set_property PACKAGE_PIN J15 [get_ports {Sw0}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw0}]
+
+set_property PACKAGE_PIN L16 [get_ports {Sw1}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw1}]
+
+set_property PACKAGE_PIN M13 [get_ports {Sw2}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw2}]
+
+set_property PACKAGE_PIN R15 [get_ports {Sw3}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw3}]
+
+set_property PACKAGE_PIN R17 [get_ports {Sw4}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw4}]
+
+set_property PACKAGE_PIN T18 [get_ports {Sw5}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw5}]
+
+set_property PACKAGE_PIN U18 [get_ports {Sw6}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw6}]
+
+set_property PACKAGE_PIN R13 [get_ports {Sw7}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw7}]
+
+set_property PACKAGE_PIN T8 [get_ports {Sw8}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw8}]
+
+set_property PACKAGE_PIN U8 [get_ports {Sw9}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw9}]
+
+set_property PACKAGE_PIN R16 [get_ports {Sw10}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw10}]
+
+set_property PACKAGE_PIN T13 [get_ports {Sw11}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw11}]
+
+set_property PACKAGE_PIN H6 [get_ports {Sw12}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw12}]
+
+set_property PACKAGE_PIN U12 [get_ports {Sw13}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw13}]
+
+set_property PACKAGE_PIN U11 [get_ports {Sw14}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw14}]
+
+set_property PACKAGE_PIN V10 [get_ports {Sw15}] 
+	set_property IOSTANDARD LVCMOS33 [get_ports {Sw15}]
+
 set_property PACKAGE_PIN T10 [get_ports {Ca}] 
 	set_property IOSTANDARD LVCMOS33 [get_ports {Ca}]
 

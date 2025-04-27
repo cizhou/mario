@@ -27,6 +27,15 @@ module vga_top(
 	input BtnU,
 	input BtnL,
 	input BtnR,
+
+	input Sw7,
+	input Sw6,
+	input Sw5,
+	input Sw4, 
+	input Sw3, 
+	input Sw2, 
+	input Sw1, 
+	input Sw0, // 8 switches
 	
 	//VGA signal
 	output hSync, vSync,
@@ -39,6 +48,9 @@ module vga_top(
 	//output MemOE, MemWR, RamCS, 
 	output QuadSpiFlashCS
 	);
+
+	assign Reset = BtnC;
+	reg [7:0] Ain;
 	
 	wire bright;
 	wire[9:0] hc, vc;
@@ -46,8 +58,20 @@ module vga_top(
 	wire [6:0] ssdOut;
 	wire [3:0] anode;
 	wire [11:0] rgb;
+
 	display_controller dc(.clk(ClkPort), .hSync(hSync), .vSync(vSync), .bright(bright), .hCount(hc), .vCount(vc));
-	vga_bitchange vbc(.clk(ClkPort), .bright(bright), .btn_jump(BtnU), .rst(BtnC), .btn_left(BtnL), .btn_right(BtnR), .hCount(hc), .vCount(vc), .rgb(rgb), .score(score));
+	
+	always @(posedge ClkPort) begin
+		if (Reset) begin
+			Ain <= 8'b0; // Optional: reset value
+		end else begin
+			Ain <= {Sw7, Sw6, Sw5, Sw4, Sw3, Sw2, Sw1, Sw0};
+		end
+	end
+
+
+	vga_bitchange vbc(.clk(ClkPort), .bright(bright), .btn_jump(BtnU), .rst(BtnC), .btn_left(BtnL), .btn_right(BtnR), .hCount(hc), .vCount(vc), .coin_num(Ain), .rgb(rgb), .score(score));
+	
 	counter cnt(.clk(ClkPort), .displayNumber(score), .anode(anode), .ssdOut(ssdOut));
 	
 	assign Dp = 1;
