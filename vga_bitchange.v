@@ -378,9 +378,11 @@ module vga_bitchange(
                     endcase
                 end
             end
+
+            //TESTING
+            // getTouchedCoinIndex = 0;
         end
     endfunction
-
 
     // handle coin animation logic
     always @(posedge clk) begin
@@ -415,6 +417,7 @@ module vga_bitchange(
     end
 
 // ----------------------------------------- CHARACTER MOVEMENT -----------------------------------------
+    integer i;
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             posX <= 10'd300;
