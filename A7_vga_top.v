@@ -49,6 +49,9 @@ module vga_top(
 	output QuadSpiFlashCS
 	);
 
+	// to produce divided clock
+	reg [26:0]	DIV_CLK;
+
 	assign Reset = BtnC;
 	reg [7:0] Ain;
 	
@@ -61,6 +64,14 @@ module vga_top(
 
 	display_controller dc(.clk(ClkPort), .hSync(hSync), .vSync(vSync), .bright(bright), .hCount(hc), .vCount(vc));
 	
+	// use a slower clock for vga_bitchange 
+	// always @(posedge ClkPort, posedge Reset) begin
+	// 	if (Reset)
+	// 	DIV_CLK <= 0;
+    //     else
+	// 	DIV_CLK <= DIV_CLK + 1'b1;
+	// end
+
 	always @(posedge ClkPort) begin
 		if (Reset) begin
 			Ain <= 8'b0; // Optional: reset value
@@ -70,7 +81,7 @@ module vga_top(
 	end
 
 
-	vga_bitchange vbc(.clk(ClkPort), .bright(bright), .btn_jump(BtnU), .rst(BtnC), .btn_left(BtnL), .btn_right(BtnR), .hCount(hc), .vCount(vc), .coin_num(Ain), .rgb(rgb), .score(score));
+	vga_bitchange vbc(.clk(ClkPort), .bright(bright), .btn_jump(BtnU), .rst(BtnC), .btn_left(BtnL), .btn_right(BtnR), .hCount(hc), .vCount(vc), .map_num(Ain), .rgb(rgb), .score(score));
 	
 	counter cnt(.clk(ClkPort), .displayNumber(score), .anode(anode), .ssdOut(ssdOut));
 	

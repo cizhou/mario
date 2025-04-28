@@ -9,7 +9,7 @@ module vga_bitchange(
     input btn_right,
     input btn_jump,
     input [9:0] hCount, vCount,
-    input [9:0] coin_num,
+    input [9:0] map_num,
     output reg [11:0] rgb,
 	output reg [15:0] score
 );
@@ -41,7 +41,7 @@ module vga_bitchange(
     parameter GROUND_Y = 10'd460; // y-coord of the top of the ground section
 
     // PLATFORM PARAMETERS
-    parameter NUM_PLATFORMS = 4;
+    parameter NUM_PLATFORMS = 6;
     parameter TILE_SIZE = 24; // adjust to match your sprite's tile size
 
     // COIN PARAMETERS
@@ -107,6 +107,7 @@ module vga_bitchange(
     reg [9:0] coin_sprite_addr; // to be calculated right before drawing
     reg [3:0] touchedCoin; // store which coin Mario collided with
     reg [3:0] touchedCoin_d;  // delayed version for next clock
+    reg [3:0] touchedCoinIndex;
     
     // coin animation variables
     reg [49:0] coin_anim_counter = 0;
@@ -122,6 +123,10 @@ module vga_bitchange(
     // GAME VARIABLES
     reg [15:0] score_temp;
     integer i; // for character movement loops
+
+    reg prev_map_num; // Stores the previous value of map_num to detect changes
+    reg coin_reset_done; // Flag to track if the coins have been reset for the current map
+
 
     // old variables
     // drawing logic variables
@@ -206,16 +211,29 @@ module vga_bitchange(
 // ------------------------------------------PLATFORMS-----------------------------------------------
 
     // LOADING PLATFORM LOCATIONS
-    reg [9:0] platform_x_start[0:NUM_PLATFORMS-1];
-    reg [9:0] platform_x_end[0:NUM_PLATFORMS-1];
-    reg [9:0] platform_y[0:NUM_PLATFORMS-1];
+    reg [9:0] platform_x_start[0:NUM_PLATFORMS*2-1];
+    reg [9:0] platform_x_end[0:NUM_PLATFORMS*2-1];
+    reg [9:0] platform_y[0:NUM_PLATFORMS*2-1];
 
     // Platform initialization (inside an `initial` block)
     initial begin
+        // platforms for map 1
         platform_x_start[0] = 500; platform_x_end[0] = 540; platform_y[0] = 400;
-        platform_x_start[1] = 250; platform_x_end[1] = 280; platform_y[1] = 300;
+        platform_x_start[1] = 250; platform_x_end[1] = 290; platform_y[1] = 300;
         platform_x_start[2] = 600; platform_x_end[2] = 640; platform_y[2] = 400;
-        platform_x_start[3] = 378; platform_x_end[3] = 450; platform_y[3] = 350;
+        platform_x_start[3] = 350; platform_x_end[3] = 450; platform_y[3] = 350;
+        platform_x_start[4] = SCREEN_LEFT; platform_x_end[4] = 200; platform_y[4] = 250;
+        platform_x_start[5] = 400; platform_x_end[5] = 500; platform_y[5] = 250;
+        
+
+        // platforms for map 2
+        platform_x_start[6] = 600; platform_x_end[6] = 640; platform_y[6] = 400;
+        platform_x_start[7] = 400; platform_x_end[7] = 540; platform_y[7] = 340;
+        platform_x_start[8] = 540; platform_x_end[8] = 700; platform_y[8] = 240;
+        platform_x_start[9] = 430; platform_x_end[9] = 470; platform_y[9] = 200;
+        platform_x_start[10] = 250; platform_x_end[10] = 400; platform_y[10] = 200;
+        platform_x_start[11] = 250; platform_x_end[11] = 300; platform_y[11] = 300;
+
     end
 
     // necessary functions
@@ -223,32 +241,48 @@ module vga_bitchange(
         input [9:0] x;
         input [9:0] y;
         integer i;
+        integer start_index;
         begin
             isPlayerInPlatform = 0;
-            for (i = 0; i < NUM_PLATFORMS; i = i + 1)
-                if (((x + CHAR_WIDTH > platform_x_start[i] && x + CHAR_WIDTH < platform_x_end[i]) ||
-                    (x > platform_x_start[i] && x < platform_x_end[i])) &&
-                    y + CHAR_HEIGHT > platform_y[i] &&
-                    y < platform_y[i] + TILE_SIZE)
+            start_index = 0;
+
+            if (map_num == 1) begin
+                start_index = 6;
+            end
+            
+
+            for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
+                if (((x + CHAR_WIDTH > platform_x_start[i + start_index] && x + CHAR_WIDTH < platform_x_end[i + start_index]) ||
+                    (x > platform_x_start[i + start_index] && x < platform_x_end[i + start_index])) &&
+                    y + CHAR_HEIGHT > platform_y[i + start_index] &&
+                    y < platform_y[i + start_index] + TILE_SIZE) begin
                     isPlayerInPlatform = 1;
+                end
+            end
         end
     endfunction
-
 
     function isHeadbuttingPlatform;
         input [9:0] x;
         input [9:0] y;
         integer i;
+        integer start_index;
         begin
             isHeadbuttingPlatform = 0;
+            start_index = 0;
+
+            if (map_num == 1) begin
+                start_index = 6;
+            end
+
             for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
                 if (
                     // Horizontal: either side of Mario is within the platform bounds
-                    ((x + CHAR_WIDTH > platform_x_start[i] && x + CHAR_WIDTH < platform_x_end[i]) ||
-                    (x > platform_x_start[i] && x < platform_x_end[i])) &&
+                    ((x + CHAR_WIDTH > platform_x_start[i + start_index] && x + CHAR_WIDTH < platform_x_end[i + start_index]) ||
+                    (x > platform_x_start[i + start_index] && x < platform_x_end[i + start_index])) &&
                     // Vertical: Mario's top touching platform's bottom
-                    y <= platform_y[i] + TILE_SIZE &&
-                    y > platform_y[i]
+                    y <= platform_y[i + start_index] + TILE_SIZE &&
+                    y > platform_y[i + start_index]
                 ) begin
                     isHeadbuttingPlatform = 1;
                 end
@@ -256,18 +290,24 @@ module vga_bitchange(
         end
     endfunction
 
-
     function isStandingOnPlatform;
         input [9:0] x;
         input [9:0] y;
         integer i;
+        integer start_index;
         begin
             isStandingOnPlatform = 0;
+            start_index = 0;
+
+            if (map_num == 1) begin
+                start_index = 6;
+            end
+
             for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
-                if (((x + CHAR_WIDTH > platform_x_start[i] && x + CHAR_WIDTH < platform_x_end[i]) ||
-                    (x > platform_x_start[i] && x < platform_x_end[i])) &&
-                    y + CHAR_HEIGHT >= platform_y[i] &&
-                    y + CHAR_HEIGHT <= platform_y[i] + 10 // Add tolerance
+                if (((x + CHAR_WIDTH > platform_x_start[i + start_index] && x + CHAR_WIDTH < platform_x_end[i + start_index]) ||
+                    (x > platform_x_start[i + start_index] && x < platform_x_end[i + start_index])) &&
+                    y + CHAR_HEIGHT >= platform_y[i + start_index] &&
+                    y + CHAR_HEIGHT <= platform_y[i + start_index] + 20 // Add tolerance
                 ) begin
                     isStandingOnPlatform = 1;
                 end
@@ -275,19 +315,25 @@ module vga_bitchange(
         end
     endfunction
 
-
     function [3:0] getStandingPlatformIndex;
         input [9:0] x;
         input [9:0] y;
         integer i;
+        integer start_index;
         begin
             getStandingPlatformIndex = 0;
+            start_index = 0;
+
+            if (map_num == 1) begin
+                start_index = 6;
+            end
+            
             for (i = 0; i < NUM_PLATFORMS; i = i + 1) begin
-                if (((x + CHAR_WIDTH > platform_x_start[i] && x + CHAR_WIDTH < platform_x_end[i]) ||
-                    (x > platform_x_start[i] && x < platform_x_end[i])) &&
-                    y + CHAR_HEIGHT <= platform_y[i] + 10 // add tolerance
+                if (((x + CHAR_WIDTH > platform_x_start[i + start_index] && x + CHAR_WIDTH < platform_x_end[i + start_index]) ||
+                    (x > platform_x_start[i + start_index] && x < platform_x_end[i + start_index])) &&
+                    y + CHAR_HEIGHT <= platform_y[i + start_index] + 20 // add tolerance
                 ) begin
-                    getStandingPlatformIndex = i;
+                    getStandingPlatformIndex = i + start_index;
                 end
             end
         end
@@ -295,86 +341,72 @@ module vga_bitchange(
 
 // ------------------------------------------------COINS-------------------------------------------------
     // LOADING COIN LOCATIONS
-    reg [9:0] coin_x[0:NUM_COINS-1];
-    reg [9:0] coin_y[0:NUM_COINS-1];
+    reg [9:0] coin_x[0:NUM_COINS*2-1];
+    reg [9:0] coin_y[0:NUM_COINS*2-1];
 
     // CHECKING COIN VISIBILITY
-    // reg coin_collected_temp [0:NUM_COINS-1]; // Only 1 bit per coin
-    reg coin_collected [0:NUM_COINS-1]; // Only 1 bit per coin
+    reg coin_collected [0:NUM_COINS*2-1]; // Only 1 bit per coin
 
-    reg coin_collected0, coin_collected1, coin_collected2, coin_collected3; // Coin collected state
+    reg coin_collected0, coin_collected1, coin_collected2, coin_collected3; // local coin collected state
+    reg coin_collected4, coin_collected5, coin_collected6, coin_collected7;
 
     // coin initialization (inside an `initial` block)
     initial begin
-        coin_x[0] = 300; coin_y[0] = 400;
+
+        // coins for map 1
+        coin_x[0] = 400; coin_y[0] = 200 - COIN_SIZE;
         coin_x[1] = 250; coin_y[1] = 300 - COIN_SIZE;
         coin_x[2] = 600; coin_y[2] = 400 - COIN_SIZE;
         coin_x[3] = 378; coin_y[3] = 350 - COIN_SIZE;
+
+        // coins for map 2
+        coin_x[4] = 620; coin_y[4] = 400 - COIN_SIZE;
+        coin_x[5] = 280; coin_y[5] = 300 - COIN_SIZE;
+        coin_x[6] = 430; coin_y[6] = 200 - COIN_SIZE;
+        coin_x[7] = 440; coin_y[7] = 340 - COIN_SIZE;
 
         // All coins are initially visible (not collected)
         coin_collected0 = 0;
         coin_collected1 = 0;
         coin_collected2 = 0;
         coin_collected3 = 0;
+        coin_collected4 = 0;
+        coin_collected5 = 0;
+        coin_collected6 = 0;
+        coin_collected7 = 0;
     end
-
-    // // check if Mario is colliding with a coin and return which coin was touched
-    // function [3:0] getTouchedCoinIndex;
-    //     input [9:0] x;
-    //     input [9:0] y;
-    //     integer i;
-    //     begin
-    //         getTouchedCoinIndex = 4'd15; // Invalid index, means no coin touched
-    //         for (i = 0; i < NUM_COINS; i = i + 1) begin
-    //             if (
-    //                 // check if any side of Mario is within coin bounds
-    //                 (((x + CHAR_WIDTH <= coin_x[i]) || (x >= coin_x[i] + COIN_SIZE)) &&
-    //                 ((y + CHAR_HEIGHT <= coin_y[i]) || (y >= coin_y[i] + COIN_SIZE)))
-    //                 // ((x + CHAR_WIDTH > coin_x[i] && x + CHAR_WIDTH < coin_x[i] + COIN_SIZE) ||
-    //                 // (x > coin_x[i] && x < coin_x[i] + COIN_SIZE)) ||
-    //                 // ((y + CHAR_HEIGHT > coin_y[i] && y + CHAR_HEIGHT < coin_y[i] + COIN_SIZE) ||
-    //                 // (y > coin_y[i] && y < coin_y[i] + COIN_SIZE)))
-    //             )
-    //             begin
-    //                  // Check each coin for collision
-    //                 if (!coin_collected0 && i == 0) begin
-    //                     getTouchedCoinIndex = 4'b00; // Coin 0 is touched
-    //                 end
-    //                 else if (!coin_collected1 && i == 1) begin
-    //                     getTouchedCoinIndex = 4'b01; // Coin 1 is touched
-    //                 end
-    //                 else if (!coin_collected2 && i == 2) begin
-    //                     getTouchedCoinIndex = 4'b10; // Coin 2 is touched
-    //                 end
-    //                 else if (!coin_collected3 && i == 3) begin
-    //                     getTouchedCoinIndex = 4'b11; // Coin 3 is touched
-    //                 end
-            
-    //             end
-    //         end
-
-    //         //TESTING
-    //         // getTouchedCoinIndex = 0;
-    //     end
-    // endfunction
 
     function [3:0] getTouchedCoinIndex;
         input [9:0] x;
         input [9:0] y;
         input coin0_collected, coin1_collected, coin2_collected, coin3_collected;
         integer i;
+        integer start_index;
         begin
             getTouchedCoinIndex = 4'd15; // No coin touched
+            start_index = 0;
+
+            // use the right section of the array based on which map we're in
+            if (map_num == 1) begin
+                start_index = 4;
+            end
 
             for (i = 0; i < NUM_COINS; i = i + 1) begin
-                if (!((x + CHAR_WIDTH <= coin_x[i]) || (x >= coin_x[i] + COIN_SIZE) ||
-                    (y + CHAR_HEIGHT <= coin_y[i]) || (y >= coin_y[i] + COIN_SIZE))) begin
+                if (!((x + CHAR_WIDTH <= coin_x[i + start_index]) || (x >= coin_x[i + start_index] + COIN_SIZE) ||
+                    (y + CHAR_HEIGHT <= coin_y[i + start_index]) || (y >= coin_y[i + start_index] + COIN_SIZE))) begin
 
-                    case (i)
+                    case (i + start_index)
+                        // map 1
                         0: if (!coin0_collected) getTouchedCoinIndex = 4'd0;
                         1: if (!coin1_collected) getTouchedCoinIndex = 4'd1;
                         2: if (!coin2_collected) getTouchedCoinIndex = 4'd2;
                         3: if (!coin3_collected) getTouchedCoinIndex = 4'd3;
+
+                        // map 2
+                        4: if (!coin0_collected) getTouchedCoinIndex = 4'd0;
+                        5: if (!coin1_collected) getTouchedCoinIndex = 4'd1;
+                        6: if (!coin2_collected) getTouchedCoinIndex = 4'd2;
+                        7: if (!coin3_collected) getTouchedCoinIndex = 4'd3;
                     endcase
                 end
             end
@@ -399,20 +431,7 @@ module vga_bitchange(
     // score and mark the coin as collected
     // integer l;
     
-    reg [3:0] touchedCoinIndex;
     always @(posedge clk) begin
-        // touchedCoin <= getTouchedCoinIndex(posX, posY);
-        // // score <= touchedCoin;
-
-        // if (touchedCoin != 4'd15 && !coin_collected[touchedCoin]) begin
-        //     coin_collected_temp[touchedCoin] <= 1;
-        //     score_temp <= score_temp + 1;
-        // end
-
-        // update score and coin_collected
-        // for (l = 0; l < NUM_COINS; l = l + 1) begin
-        //     coin_collected[l] <= coin_collected_temp[l];
-        // end
         score <= score_temp;
     end
 
@@ -431,17 +450,10 @@ module vga_bitchange(
             coin_collected1 <= 0;
             coin_collected2 <= 0;
             coin_collected3 <= 0;
-
-            // reset coin visibility
-            // if (coin_num != 15)
-            //     // turn off the one from the switch 
-            //     coin_collected_temp[coin_num] <= 1;
-            // else begin
-            //     coin_collected_temp[0] = 1;
-            //     coin_collected_temp[1] = 0;
-            //     coin_collected_temp[2] = 0;
-            //     coin_collected_temp[3] = 0;
-            // end
+            coin_collected4 <= 0;
+            coin_collected5 <= 0;
+            coin_collected6 <= 0;
+            coin_collected7 <= 0;
         
         end else begin
             // load default sprite if nothing's happening
@@ -604,31 +616,52 @@ module vga_bitchange(
 
 
             // Check for which coin Mario has touched
-            touchedCoinIndex = getTouchedCoinIndex(posX, posY, coin_collected0, coin_collected1, coin_collected2, coin_collected3);
+            if (map_num == 0) begin
+                touchedCoinIndex = getTouchedCoinIndex(posX, posY, coin_collected0, coin_collected1, coin_collected2, coin_collected3);
+            end
+            else if (map_num == 1) begin
+                touchedCoinIndex = getTouchedCoinIndex(posX, posY, coin_collected4, coin_collected5, coin_collected6, coin_collected7);
+            end
 
             // Update coin collected states and score based on touched coin
             case (touchedCoinIndex)
                 2'b00: begin
-                    if (!coin_collected0) begin
+                    if (!coin_collected0 && map_num == 0) begin
                         coin_collected0 <= 1;  // Mark coin 0 as collected
+                        score_temp <= score_temp + 1;    // Increment score
+                    end
+                    else if (!coin_collected4 && map_num == 1) begin
+                        coin_collected4 <= 1;  // Mark coin 0 as collected
                         score_temp <= score_temp + 1;    // Increment score
                     end
                 end
                 2'b01: begin
-                    if (!coin_collected1) begin
+                    if (!coin_collected1 && map_num == 0) begin
                         coin_collected1 <= 1;  // Mark coin 1 as collected
+                        score_temp <= score_temp + 1;    // Increment score
+                    end
+                    else if (!coin_collected5 && map_num == 1) begin
+                        coin_collected5 <= 1;  // Mark coin 0 as collected
                         score_temp <= score_temp + 1;    // Increment score
                     end
                 end
                 2'b10: begin
-                    if (!coin_collected2) begin
+                    if (!coin_collected2 && map_num == 0) begin
                         coin_collected2 <= 1;  // Mark coin 2 as collected
+                        score_temp <= score_temp + 1;    // Increment score
+                    end
+                    else if (!coin_collected6 && map_num == 1) begin
+                        coin_collected6 <= 1;  // Mark coin 0 as collected
                         score_temp <= score_temp + 1;    // Increment score
                     end
                 end
                 2'b11: begin
-                    if (!coin_collected3) begin
+                    if (!coin_collected3 && map_num == 0) begin
                         coin_collected3 <= 1;  // Mark coin 3 as collected
+                        score_temp <= score_temp + 1;    // Increment score
+                    end
+                    else if (!coin_collected7 && map_num == 1) begin
+                        coin_collected7 <= 1;  // Mark coin 0 as collected
                         score_temp <= score_temp + 1;    // Increment score
                     end
                 end
@@ -653,18 +686,26 @@ module vga_bitchange(
 
     // logic to get the pixel addresses of all the platforms
     integer j;
+    integer start_index;
     always @(posedge clk) begin
         isPlatformPixel = 0;
         platform_sprite_addr = 0;
+        j = 0;
+        start_index = 0;
+
+        if (map_num == 1) begin
+                start_index = 6;
+        end
 
         for (j = 0; j < NUM_PLATFORMS; j = j + 1) begin
-            if (hCount >= platform_x_start[j] && hCount < platform_x_end[j] &&
-                vCount >= platform_y[j] && vCount < platform_y[j] + TILE_SIZE) begin
+            if (hCount >= platform_x_start[j + start_index] && hCount < platform_x_end[j + start_index] &&
+                vCount >= platform_y[j + start_index] && vCount < platform_y[j + start_index] + TILE_SIZE) begin
                 isPlatformPixel = 1;
-                platform_sprite_addr = ((vCount - platform_y[j]) % TILE_SIZE) * TILE_SIZE + (hCount - platform_x_start[j]) % TILE_SIZE;
+                platform_sprite_addr = ((vCount - platform_y[j + start_index]) % TILE_SIZE) * TILE_SIZE + (hCount - platform_x_start[j + start_index]) % TILE_SIZE;
             end
         end
     end
+
 
     // handle coin drawing
     // integer c;
@@ -673,7 +714,7 @@ module vga_bitchange(
         coin_sprite_addr = 0;
         coin_pixel_color = TRANSPARENT_COLOR;
 
-        if (!coin_collected0 &&
+        if (!coin_collected0 && map_num == 0 && 
                 hCount >= coin_x[0] && hCount < coin_x[0] + COIN_SIZE &&
                 vCount >= coin_y[0] && vCount < coin_y[0] + COIN_SIZE) begin
 
@@ -682,7 +723,7 @@ module vga_bitchange(
                                 (hCount - coin_x[0]) % COIN_SIZE;
         end
 
-        else if (!coin_collected1 &&
+        else if (!coin_collected1 && map_num == 0 && 
                 hCount >= coin_x[1] && hCount < coin_x[1] + COIN_SIZE &&
                 vCount >= coin_y[1] && vCount < coin_y[1] + COIN_SIZE) begin
 
@@ -691,7 +732,7 @@ module vga_bitchange(
                                 (hCount - coin_x[1]) % COIN_SIZE;
         end
 
-        else if (!coin_collected2 &&
+        else if (!coin_collected2 && map_num == 0 && 
                 hCount >= coin_x[2] && hCount < coin_x[2] + COIN_SIZE &&
                 vCount >= coin_y[2] && vCount < coin_y[2] + COIN_SIZE) begin
 
@@ -700,13 +741,48 @@ module vga_bitchange(
                                 (hCount - coin_x[2]) % COIN_SIZE;
         end
 
-        else if (!coin_collected3 &&
+        else if (!coin_collected3 && map_num == 0 && 
                 hCount >= coin_x[3] && hCount < coin_x[3] + COIN_SIZE &&
                 vCount >= coin_y[3] && vCount < coin_y[3] + COIN_SIZE) begin
 
                 isCoinPixel = 1;
                 coin_sprite_addr = ((vCount - coin_y[3]) % COIN_SIZE) * COIN_SIZE +
                                 (hCount - coin_x[3]) % COIN_SIZE;
+        end
+        if (!coin_collected4 && map_num == 1 && 
+                hCount >= coin_x[4] && hCount < coin_x[4] + COIN_SIZE &&
+                vCount >= coin_y[4] && vCount < coin_y[4] + COIN_SIZE) begin
+
+                isCoinPixel = 1;
+                coin_sprite_addr = ((vCount - coin_y[4]) % COIN_SIZE) * COIN_SIZE +
+                                (hCount - coin_x[4]) % COIN_SIZE;
+        end
+
+        else if (!coin_collected5 && map_num == 1 && 
+                hCount >= coin_x[5] && hCount < coin_x[5] + COIN_SIZE &&
+                vCount >= coin_y[5] && vCount < coin_y[5] + COIN_SIZE) begin
+
+                isCoinPixel = 1;
+                coin_sprite_addr = ((vCount - coin_y[5]) % COIN_SIZE) * COIN_SIZE +
+                                (hCount - coin_x[5]) % COIN_SIZE;
+        end
+
+        else if (!coin_collected6 && map_num == 1 && 
+                hCount >= coin_x[6] && hCount < coin_x[6] + COIN_SIZE &&
+                vCount >= coin_y[6] && vCount < coin_y[6] + COIN_SIZE) begin
+
+                isCoinPixel = 1;
+                coin_sprite_addr = ((vCount - coin_y[6]) % COIN_SIZE) * COIN_SIZE +
+                                (hCount - coin_x[6]) % COIN_SIZE;
+        end
+
+        else if (!coin_collected7 && map_num == 1 && 
+                hCount >= coin_x[7] && hCount < coin_x[7] + COIN_SIZE &&
+                vCount >= coin_y[7] && vCount < coin_y[7] + COIN_SIZE) begin
+
+                isCoinPixel = 1;
+                coin_sprite_addr = ((vCount - coin_y[7]) % COIN_SIZE) * COIN_SIZE +
+                                (hCount - coin_x[7]) % COIN_SIZE;
         end
 
         // Pick frame based on animation
